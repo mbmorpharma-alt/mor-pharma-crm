@@ -11,13 +11,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 export type TaskFormValues = {
   id?: number;
@@ -25,8 +18,6 @@ export type TaskFormValues = {
   dueDate: string;
   contactId: string;
 };
-
-type ContactOption = { id: number; name: string };
 
 const EMPTY: TaskFormValues = { title: "", dueDate: "", contactId: "" };
 
@@ -43,14 +34,10 @@ export function TaskFormDialog({
 }) {
   const [values, setValues] = useState<TaskFormValues>(EMPTY);
   const [saving, setSaving] = useState(false);
-  const [contacts, setContacts] = useState<ContactOption[]>([]);
 
   useEffect(() => {
     if (open) {
       setValues(initial ?? EMPTY);
-      fetch("/api/contacts")
-        .then((res) => res.json())
-        .then((data) => setContacts(data));
     }
   }, [open, initial]);
 
@@ -100,27 +87,6 @@ export function TaskFormDialog({
               value={values.dueDate}
               onChange={(e) => setValues({ ...values, dueDate: e.target.value })}
             />
-          </div>
-          <div>
-            <Label htmlFor="contactId">איש קשר</Label>
-            <Select
-              value={values.contactId}
-              onValueChange={(v) =>
-                setValues({ ...values, contactId: !v || v === "none" ? "" : v })
-              }
-            >
-              <SelectTrigger id="contactId" className="w-full">
-                <SelectValue placeholder="ללא איש קשר" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">ללא איש קשר</SelectItem>
-                {contacts.map((c) => (
-                  <SelectItem key={c.id} value={String(c.id)}>
-                    {c.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </div>
           <DialogFooter>
             <Button type="submit" disabled={saving}>
