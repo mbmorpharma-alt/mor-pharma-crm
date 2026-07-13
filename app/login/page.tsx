@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, Suspense } from "react";
+import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,6 +40,9 @@ function LoginForm() {
     <div dir="rtl" className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
       <Card className="w-full max-w-sm">
         <CardHeader>
+          <div className="mb-2 flex justify-center">
+            <Image src="/logo.png" alt="מור פארמה" width={160} height={58} priority />
+          </div>
           <CardTitle className="text-center text-xl">כניסה למערכת CRM</CardTitle>
         </CardHeader>
         <CardContent>

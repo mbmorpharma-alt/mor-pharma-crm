@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -28,7 +29,10 @@ export function Nav() {
     <header className="border-b bg-background">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
         <div className="flex items-center gap-6">
-          <span className="text-lg font-bold">CRM מור פארמה</span>
+          <Link href="/" className="flex items-center gap-2">
+            <Image src="/logo.png" alt="מור פארמה" width={100} height={36} priority />
+            <span className="text-sm font-semibold text-muted-foreground">CRM</span>
+          </Link>
           <nav className="flex items-center gap-1">
             {links.map((link) => (
               <Link
