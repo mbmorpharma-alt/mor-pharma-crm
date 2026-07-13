@@ -23,6 +23,7 @@ import { STATUSES, STATUS_COLORS } from "@/lib/statuses";
 import { toWhatsAppNumber } from "@/lib/whatsapp";
 import { ContactFormDialog, ContactFormValues } from "@/components/contact-form-dialog";
 import { FollowUpMenu } from "@/components/follow-up-menu";
+import { TaskFormDialog, TaskFormValues } from "@/components/task-form-dialog";
 
 type Task = {
   id: number;
@@ -39,7 +40,6 @@ type Contact = {
   company: string | null;
   notes: string | null;
   status: string;
-  bookCount: string | null;
   whatsappSummary: string | null;
   tasks: Task[];
 };
@@ -51,6 +51,8 @@ export default function ContactsPage() {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<ContactFormValues | null>(null);
+  const [taskDialogOpen, setTaskDialogOpen] = useState(false);
+  const [taskForContact, setTaskForContact] = useState<TaskFormValues | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -90,11 +92,6 @@ export default function ContactsPage() {
     if (!confirm("למחוק את איש הקשר? הפעולה תמחק גם משימות ועסקאות משויכות.")) return;
     await fetch(`/api/contacts/${id}`, { method: "DELETE" });
     load();
-  }
-
-  function bookCountBadge(count: string | null) {
-    if (!count) return null;
-    return <Badge variant="secondary">{count}</Badge>;
   }
 
   return (
@@ -143,7 +140,6 @@ export default function ContactsPage() {
               <TableHead>שם</TableHead>
               <TableHead>טלפון</TableHead>
               <TableHead>משימה קרובה</TableHead>
-              <TableHead>ספרים</TableHead>
               <TableHead>סטטוס</TableHead>
               <TableHead>פעולות</TableHead>
             </TableRow>
@@ -151,14 +147,14 @@ export default function ContactsPage() {
           <TableBody>
             {loading && (
               <TableRow>
-                <TableCell colSpan={6} className="text-center text-muted-foreground">
+                <TableCell colSpan={5} className="text-center text-muted-foreground">
                   טוען...
                 </TableCell>
               </TableRow>
             )}
             {!loading && contacts.length === 0 && (
               <TableRow>
-                <TableCell colSpan={6} className="text-center text-muted-foreground">
+                <TableCell colSpan={5} className="text-center text-muted-foreground">
                   לא נמצאו אנשי קשר
                 </TableCell>
               </TableRow>
@@ -196,22 +192,37 @@ export default function ContactsPage() {
                     )}
                   </TableCell>
                   <TableCell>
-                    {nextTask ? (
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm">{nextTask.title}</span>
-                        <button
-                          onClick={() => completeTask(nextTask.id)}
-                          title="סמן כהושלם"
-                          className="text-green-600 hover:text-green-800"
-                        >
-                          ✓
-                        </button>
-                      </div>
-                    ) : (
-                      <span className="text-muted-foreground">—</span>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {nextTask ? (
+                        <>
+                          <span className="text-sm">{nextTask.title}</span>
+                          <button
+                            onClick={() => completeTask(nextTask.id)}
+                            title="סמן כהושלם"
+                            className="text-green-600 hover:text-green-800"
+                          >
+                            ✓
+                          </button>
+                        </>
+                      ) : (
+                        <span className="text-muted-foreground">—</span>
+                      )}
+                      <button
+                        onClick={() => {
+                          setTaskForContact({
+                            title: "",
+                            dueDate: "",
+                            contactId: String(contact.id),
+                          });
+                          setTaskDialogOpen(true);
+                        }}
+                        title="הוסף משימה"
+                        className="text-muted-foreground hover:text-foreground"
+                      >
+                        📅
+                      </button>
+                    </div>
                   </TableCell>
-                  <TableCell>{bookCountBadge(contact.bookCount)}</TableCell>
                   <TableCell>
                     <Select
                       value={contact.status}
@@ -248,7 +259,6 @@ export default function ContactsPage() {
                             company: contact.company ?? "",
                             notes: contact.notes ?? "",
                             status: contact.status,
-                            bookCount: contact.bookCount ?? "",
                             whatsappSummary: contact.whatsappSummary ?? "",
                           });
                           setDialogOpen(true);
@@ -276,6 +286,13 @@ export default function ContactsPage() {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         initial={editing}
+        onSaved={load}
+      />
+
+      <TaskFormDialog
+        open={taskDialogOpen}
+        onOpenChange={setTaskDialogOpen}
+        initial={taskForContact}
         onSaved={load}
       />
     </div>

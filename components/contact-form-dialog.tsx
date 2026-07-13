@@ -29,7 +29,6 @@ export type ContactFormValues = {
   company: string;
   notes: string;
   status: string;
-  bookCount: string;
   whatsappSummary: string;
 };
 
@@ -40,7 +39,6 @@ const EMPTY: ContactFormValues = {
   company: "",
   notes: "",
   status: "חדש",
-  bookCount: "",
   whatsappSummary: "",
 };
 
@@ -122,14 +120,6 @@ export function ContactFormDialog({
                 id="company"
                 value={values.company}
                 onChange={(e) => setValues({ ...values, company: e.target.value })}
-              />
-            </div>
-            <div>
-              <Label htmlFor="bookCount">כמה ספרים</Label>
-              <Input
-                id="bookCount"
-                value={values.bookCount}
-                onChange={(e) => setValues({ ...values, bookCount: e.target.value })}
               />
             </div>
             <div className="col-span-2">

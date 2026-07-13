@@ -8,6 +8,8 @@ import { STATUS_COLORS } from "@/lib/statuses";
 import { toWhatsAppNumber } from "@/lib/whatsapp";
 import { ContactFormDialog, ContactFormValues } from "@/components/contact-form-dialog";
 import { FollowUpMenu } from "@/components/follow-up-menu";
+import { TaskFormDialog, TaskFormValues } from "@/components/task-form-dialog";
+import { Textarea } from "@/components/ui/textarea";
 
 type Deal = {
   id: number;
@@ -39,7 +41,6 @@ type ContactDetail = {
   company: string | null;
   notes: string | null;
   status: string;
-  bookCount: string | null;
   whatsappSummary: string | null;
   deals: Deal[];
   tasks: Task[];
@@ -55,6 +56,9 @@ export default function ContactProfilePage({
   const [contact, setContact] = useState<ContactDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [taskDialogOpen, setTaskDialogOpen] = useState(false);
+  const [noteText, setNoteText] = useState("");
+  const [savingNote, setSavingNote] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -68,6 +72,20 @@ export default function ContactProfilePage({
   useEffect(() => {
     load();
   }, [load]);
+
+  async function addNote(e: React.FormEvent) {
+    e.preventDefault();
+    if (!noteText.trim()) return;
+    setSavingNote(true);
+    await fetch("/api/activities", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "תהליך", note: noteText, contactId: id }),
+    });
+    setNoteText("");
+    setSavingNote(false);
+    load();
+  }
 
   if (loading) {
     return <div className="p-4 text-center text-muted-foreground">טוען...</div>;
@@ -85,8 +103,13 @@ export default function ContactProfilePage({
     company: contact.company ?? "",
     notes: contact.notes ?? "",
     status: contact.status,
-    bookCount: contact.bookCount ?? "",
     whatsappSummary: contact.whatsappSummary ?? "",
+  };
+
+  const taskValues: TaskFormValues = {
+    title: "",
+    dueDate: "",
+    contactId: String(contact.id),
   };
 
   return (
@@ -133,10 +156,6 @@ export default function ContactProfilePage({
             <span className="text-muted-foreground">אימייל: </span>
             {contact.email || "—"}
           </div>
-          <div>
-            <span className="text-muted-foreground">כמה ספרים: </span>
-            {contact.bookCount || "—"}
-          </div>
           <div className="col-span-2">
             <span className="text-muted-foreground">הערות: </span>
             {contact.notes || "—"}
@@ -174,8 +193,11 @@ export default function ContactProfilePage({
       </Card>
 
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>משימות ({contact.tasks.length})</CardTitle>
+          <Button variant="outline" size="sm" onClick={() => setTaskDialogOpen(true)}>
+            + הוסף משימה
+          </Button>
         </CardHeader>
         <CardContent className="flex flex-col gap-2">
           {contact.tasks.length === 0 && (
@@ -203,7 +225,17 @@ export default function ContactProfilePage({
         <CardHeader>
           <CardTitle>היסטוריית פעילות ({contact.activities.length})</CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-col gap-2">
+        <CardContent className="flex flex-col gap-3">
+          <form onSubmit={addNote} className="flex flex-col gap-2">
+            <Textarea
+              placeholder="כתוב על התהליך עם הלקוח..."
+              value={noteText}
+              onChange={(e) => setNoteText(e.target.value)}
+            />
+            <Button type="submit" size="sm" className="self-start" disabled={savingNote}>
+              {savingNote ? "שומר..." : "הוסף הערה"}
+            </Button>
+          </form>
           {contact.activities.length === 0 && (
             <p className="text-muted-foreground text-sm">אין פעילות</p>
           )}
@@ -225,6 +257,13 @@ export default function ContactProfilePage({
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         initial={editValues}
+        onSaved={load}
+      />
+
+      <TaskFormDialog
+        open={taskDialogOpen}
+        onOpenChange={setTaskDialogOpen}
+        initial={taskValues}
         onSaved={load}
       />
     </div>
