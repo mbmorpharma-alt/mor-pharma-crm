@@ -41,7 +41,7 @@ function LoginForm() {
       <Card className="w-full max-w-sm">
         <CardHeader>
           <div className="mb-2 flex justify-center">
-            <Image src="/logo.png" alt="מור פארמה" width={160} height={58} priority />
+            <Image src="/logo.png" alt="מור פארמה" width={200} height={73} priority />
           </div>
           <CardTitle className="text-center text-xl">כניסה למערכת CRM</CardTitle>
         </CardHeader>

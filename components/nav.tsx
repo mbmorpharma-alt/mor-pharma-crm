@@ -27,12 +27,13 @@ export function Nav() {
 
   return (
     <header className="border-b bg-background">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-        <div className="flex items-center gap-6">
-          <Link href="/" className="flex items-center gap-2">
-            <Image src="/logo.png" alt="מור פארמה" width={100} height={36} priority />
-            <span className="text-sm font-semibold text-muted-foreground">CRM</span>
-          </Link>
+      <div className="mx-auto flex max-w-6xl items-center justify-center px-4 py-4">
+        <Link href="/">
+          <Image src="/logo.png" alt="מור פארמה" width={180} height={65} priority />
+        </Link>
+      </div>
+      <div className="border-t">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-2">
           <nav className="flex items-center gap-1">
             {links.map((link) => (
               <Link
@@ -49,10 +50,10 @@ export function Nav() {
               </Link>
             ))}
           </nav>
+          <Button variant="outline" size="sm" onClick={handleLogout}>
+            התנתקות
+          </Button>
         </div>
-        <Button variant="outline" size="sm" onClick={handleLogout}>
-          התנתקות
-        </Button>
       </div>
     </header>
   );
