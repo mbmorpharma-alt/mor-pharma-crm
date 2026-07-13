@@ -10,6 +10,16 @@ import { ContactFormDialog, ContactFormValues } from "@/components/contact-form-
 import { FollowUpMenu } from "@/components/follow-up-menu";
 import { TaskFormDialog, TaskFormValues } from "@/components/task-form-dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+
+function toDatetimeLocal(iso: string | null) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(
+    d.getHours()
+  )}:${pad(d.getMinutes())}`;
+}
 
 type Deal = {
   id: number;
@@ -57,6 +67,7 @@ export default function ContactProfilePage({
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [taskDialogOpen, setTaskDialogOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState<TaskFormValues | null>(null);
   const [noteText, setNoteText] = useState("");
   const [savingNote, setSavingNote] = useState(false);
 
@@ -87,6 +98,26 @@ export default function ContactProfilePage({
     load();
   }
 
+  async function toggleTaskCompleted(task: Task) {
+    await fetch(`/api/tasks/${task.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: task.title,
+        dueDate: task.dueDate,
+        completed: !task.completed,
+        contactId: id,
+      }),
+    });
+    load();
+  }
+
+  async function deleteTask(taskId: number) {
+    if (!confirm("למחוק את המשימה?")) return;
+    await fetch(`/api/tasks/${taskId}`, { method: "DELETE" });
+    load();
+  }
+
   if (loading) {
     return <div className="p-4 text-center text-muted-foreground">טוען...</div>;
   }
@@ -104,12 +135,6 @@ export default function ContactProfilePage({
     notes: contact.notes ?? "",
     status: contact.status,
     whatsappSummary: contact.whatsappSummary ?? "",
-  };
-
-  const taskValues: TaskFormValues = {
-    title: "",
-    dueDate: "",
-    contactId: String(contact.id),
   };
 
   return (
@@ -195,7 +220,14 @@ export default function ContactProfilePage({
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>משימות ({contact.tasks.length})</CardTitle>
-          <Button variant="outline" size="sm" onClick={() => setTaskDialogOpen(true)}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setEditingTask({ title: "", dueDate: "", contactId: String(contact.id) });
+              setTaskDialogOpen(true);
+            }}
+          >
             + הוסף משימה
           </Button>
         </CardHeader>
@@ -206,9 +238,15 @@ export default function ContactProfilePage({
           {contact.tasks.map((task) => (
             <div
               key={task.id}
-              className="flex items-center justify-between rounded-md border p-2 text-sm"
+              className="flex items-center gap-2 rounded-md border p-2 text-sm"
             >
-              <span className={task.completed ? "line-through text-muted-foreground" : ""}>
+              <Checkbox
+                checked={task.completed}
+                onCheckedChange={() => toggleTaskCompleted(task)}
+              />
+              <span
+                className={`flex-1 ${task.completed ? "line-through text-muted-foreground" : ""}`}
+              >
                 {task.title}
               </span>
               {task.dueDate && (
@@ -216,6 +254,23 @@ export default function ContactProfilePage({
                   {new Date(task.dueDate).toLocaleString("he-IL")}
                 </span>
               )}
+              <button
+                onClick={() => {
+                  setEditingTask({
+                    id: task.id,
+                    title: task.title,
+                    dueDate: toDatetimeLocal(task.dueDate),
+                    contactId: String(contact.id),
+                  });
+                  setTaskDialogOpen(true);
+                }}
+                title="עריכה"
+              >
+                ✏️
+              </button>
+              <button onClick={() => deleteTask(task.id)} title="מחיקה">
+                ✕
+              </button>
             </div>
           ))}
         </CardContent>
@@ -263,7 +318,7 @@ export default function ContactProfilePage({
       <TaskFormDialog
         open={taskDialogOpen}
         onOpenChange={setTaskDialogOpen}
-        initial={taskValues}
+        initial={editingTask}
         onSaved={load}
       />
     </div>
