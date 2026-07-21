@@ -95,7 +95,7 @@ export default function ContactsPage() {
   }
 
   return (
-    <div dir="rtl" className="mx-auto max-w-6xl p-4 flex flex-col gap-4">
+    <div dir="rtl" className="mx-auto w-full max-w-none p-4 flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">אנשי קשר</h1>
         <Button
