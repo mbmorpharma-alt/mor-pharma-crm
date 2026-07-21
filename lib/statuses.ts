@@ -1,4 +1,4 @@
-export const STATUSES = ["חדש", "🔥 חם", "🌡️ פושר", "❄️ קר", "📵 ללא מענה", "⚙️ בטיפול", "✅ סגור"];
+export const STATUSES = ["חדש", "🔥 חם", "🌡️ פושר", "❄️ קר", "📵 ללא מענה", "⚙️ בטיפול", "✅ סגור", "🚫 לא רלוונטי"];
 
 export const STATUS_COLORS: Record<string, string> = {
   "חדש": "bg-blue-100 text-blue-800",
@@ -8,4 +8,5 @@ export const STATUS_COLORS: Record<string, string> = {
   "📵 ללא מענה": "bg-gray-100 text-gray-800",
   "⚙️ בטיפול": "bg-yellow-100 text-yellow-800",
   "✅ סגור": "bg-green-100 text-green-800",
+  "🚫 לא רלוונטי": "bg-neutral-200 text-neutral-700",
 };
