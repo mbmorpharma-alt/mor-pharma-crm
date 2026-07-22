@@ -4,6 +4,14 @@ import { useEffect, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { TaskFormDialog, TaskFormValues } from "@/components/task-form-dialog";
 import { FollowUpMenu } from "@/components/follow-up-menu";
 import { toWhatsAppNumber } from "@/lib/whatsapp";
@@ -115,22 +123,67 @@ export default function TasksPage() {
   const pending = tasks.filter((t) => !t.completed);
   const done = tasks.filter((t) => t.completed);
 
-  function renderTask(task: Task) {
-    const isOverdue =
-      !task.completed && !!task.dueDate && new Date(task.dueDate) < new Date();
-
+  function renderTaskRow(task: Task) {
     return (
-      <div
-        key={task.id}
-        className={`flex flex-col gap-2 rounded-lg border bg-background p-3 ${
-          isOverdue ? "border-red-200 bg-red-50/40" : ""
-        }`}
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <button onClick={() => deleteTask(task.id)} title="מחיקה" className="hover:text-foreground">
-              ✕
-            </button>
+      <TableRow key={task.id}>
+        <TableCell>
+          {task.contact ? (
+            <a
+              href={`/contacts/${task.contact.id}`}
+              className={`hover:underline ${
+                contactPillColor(task.contact.id).match(/text-\S+/)?.[0] ?? ""
+              }`}
+            >
+              {task.contact.name}
+            </a>
+          ) : (
+            <span className="text-muted-foreground">—</span>
+          )}
+        </TableCell>
+        <TableCell>
+          {task.contact?.phone ? (
+            <div className="flex items-center gap-2">
+              <span>{task.contact.phone}</span>
+              <a
+                href={`https://wa.me/${toWhatsAppNumber(task.contact.phone)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="פתח וואטסאפ"
+              >
+                💬
+              </a>
+            </div>
+          ) : (
+            <span className="text-muted-foreground">—</span>
+          )}
+        </TableCell>
+        <TableCell>
+          <div className={task.completed ? "line-through text-muted-foreground" : ""}>
+            {task.title}
+          </div>
+          {task.contact?.activities[0] && (
+            <div className="mt-1 text-xs text-green-700">
+              {task.contact.activities[0].note}
+            </div>
+          )}
+        </TableCell>
+        <TableCell>{dueTag(task.dueDate, task.completed)}</TableCell>
+        <TableCell>
+          <div className="flex items-center gap-1">
+            {task.contact?.phone && (
+              <FollowUpMenu
+                contactId={task.contact.id}
+                name={task.contact.name}
+                phone={task.contact.phone}
+                onSent={load}
+                pill
+              />
+            )}
+            <Checkbox
+              checked={task.completed}
+              onCheckedChange={() => toggleCompleted(task)}
+              title="הושלם"
+            />
             <button
               onClick={() => {
                 setEditing({
@@ -142,61 +195,20 @@ export default function TasksPage() {
                 setDialogOpen(true);
               }}
               title="עריכה"
-              className="hover:text-foreground"
+              className="text-muted-foreground hover:text-foreground"
             >
               ✏️
             </button>
-          </div>
-          <Checkbox checked={task.completed} onCheckedChange={() => toggleCompleted(task)} />
-        </div>
-
-        <div
-          className={`text-right font-medium ${
-            task.completed ? "line-through text-muted-foreground" : ""
-          }`}
-        >
-          {task.title}
-        </div>
-
-        <div className="flex flex-wrap items-center justify-end gap-2">
-          {dueTag(task.dueDate, task.completed)}
-          {task.contact?.phone && (
-            <FollowUpMenu
-              contactId={task.contact.id}
-              name={task.contact.name}
-              phone={task.contact.phone}
-              onSent={load}
-              pill
-            />
-          )}
-          {task.contact?.phone && (
-            <a
-              href={`https://wa.me/${toWhatsAppNumber(task.contact.phone)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex h-6 items-center rounded-full border border-green-300 bg-green-50 px-2 text-xs text-green-800 hover:bg-green-100"
+            <button
+              onClick={() => deleteTask(task.id)}
+              title="מחיקה"
+              className="text-muted-foreground hover:text-foreground"
             >
-              💬 וואטסאפ
-            </a>
-          )}
-          {task.contact && (
-            <a
-              href={`/contacts/${task.contact.id}`}
-              className={`text-xs hover:underline ${
-                contactPillColor(task.contact.id).match(/text-\S+/)?.[0] ?? ""
-              }`}
-            >
-              👤 {task.contact.name}
-            </a>
-          )}
-        </div>
-
-        {task.contact?.activities[0] && (
-          <div className="rounded-md border border-green-200 bg-green-50 p-2 text-xs text-green-800">
-            {task.contact.activities[0].note}
+              ✕
+            </button>
           </div>
-        )}
-      </div>
+        </TableCell>
+      </TableRow>
     );
   }
 
@@ -222,10 +234,24 @@ export default function TasksPage() {
             <h2 className="text-sm font-semibold text-muted-foreground">
               ממתינות ({pending.length})
             </h2>
-            {pending.length === 0 && (
+            {pending.length === 0 ? (
               <p className="text-sm text-muted-foreground">אין משימות ממתינות</p>
+            ) : (
+              <div className="rounded-lg border bg-background">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>שם</TableHead>
+                      <TableHead>טלפון</TableHead>
+                      <TableHead>משימה</TableHead>
+                      <TableHead>סטטוס</TableHead>
+                      <TableHead>פעולות</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>{pending.map(renderTaskRow)}</TableBody>
+                </Table>
+              </div>
             )}
-            {pending.map(renderTask)}
           </div>
 
           {done.length > 0 && (
@@ -233,7 +259,20 @@ export default function TasksPage() {
               <h2 className="text-sm font-semibold text-muted-foreground">
                 הושלמו ({done.length})
               </h2>
-              {done.map(renderTask)}
+              <div className="rounded-lg border bg-background">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>שם</TableHead>
+                      <TableHead>טלפון</TableHead>
+                      <TableHead>משימה</TableHead>
+                      <TableHead>סטטוס</TableHead>
+                      <TableHead>פעולות</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>{done.map(renderTaskRow)}</TableBody>
+                </Table>
+              </div>
             </div>
           )}
         </>
