@@ -64,13 +64,21 @@ export function FollowUpMenu({
           </Button>
         }
       />
-      <DropdownMenuContent align="end" dir="rtl">
+      <DropdownMenuContent
+        align="end"
+        dir="rtl"
+        className="flex w-80 flex-col gap-2 rounded-2xl p-3"
+      >
+        <div className="border-b px-1 pb-2 text-right font-semibold">
+          ⚡ פולו אפ ל{name}
+        </div>
         {followUpTemplates.map((template) => (
           <DropdownMenuItem
             key={template.id}
             onClick={() => send(template.build(name))}
+            className="whitespace-normal rounded-lg border p-3 text-center text-sm leading-relaxed data-highlighted:bg-accent"
           >
-            {template.label}
+            {template.build(name)}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>
