@@ -150,17 +150,6 @@ export default function TasksPage() {
           <Checkbox checked={task.completed} onCheckedChange={() => toggleCompleted(task)} />
         </div>
 
-        {task.contact && (
-          <a
-            href={`/contacts/${task.contact.id}`}
-            className={`self-start text-base font-semibold hover:underline ${
-              contactPillColor(task.contact.id).match(/text-\S+/)?.[0] ?? ""
-            }`}
-          >
-            👤 {task.contact.name}
-          </a>
-        )}
-
         <div
           className={`text-right font-medium ${
             task.completed ? "line-through text-muted-foreground" : ""
@@ -188,6 +177,16 @@ export default function TasksPage() {
               className="inline-flex h-6 items-center rounded-full border border-green-300 bg-green-50 px-2 text-xs text-green-800 hover:bg-green-100"
             >
               💬 וואטסאפ
+            </a>
+          )}
+          {task.contact && (
+            <a
+              href={`/contacts/${task.contact.id}`}
+              className={`text-xs hover:underline ${
+                contactPillColor(task.contact.id).match(/text-\S+/)?.[0] ?? ""
+              }`}
+            >
+              👤 {task.contact.name}
             </a>
           )}
         </div>
