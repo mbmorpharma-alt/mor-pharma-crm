@@ -41,31 +41,15 @@ function dueTag(dueDate: string | null, completed: boolean) {
   startOfDayAfter.setDate(startOfDayAfter.getDate() + 1);
 
   if (due < now) {
-    return (
-      <Badge className="bg-red-100 text-red-800">
-        ⚠️ באיחור ({due.toLocaleString("he-IL", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })})
-      </Badge>
-    );
+    return <Badge className="bg-red-100 text-red-800">⚠️ באיחור</Badge>;
   }
   if (due < startOfTomorrow) {
-    return (
-      <Badge className="bg-orange-100 text-orange-800">
-        🔥 היום ({due.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" })})
-      </Badge>
-    );
+    return <Badge className="bg-orange-100 text-orange-800">🔥 היום</Badge>;
   }
   if (due < startOfDayAfter) {
-    return (
-      <Badge className="bg-purple-100 text-purple-800">
-        📅 מחר ({due.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" })})
-      </Badge>
-    );
+    return <Badge className="bg-purple-100 text-purple-800">📅 מחר</Badge>;
   }
-  return (
-    <Badge className="bg-blue-100 text-blue-800">
-      📅 {due.toLocaleString("he-IL", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })}
-    </Badge>
-  );
+  return <Badge className="bg-blue-100 text-blue-800">📅 מאוחר יותר</Badge>;
 }
 
 const CONTACT_PILL_COLORS = [
@@ -169,7 +153,7 @@ export default function TasksPage() {
         {task.contact && (
           <a
             href={`/contacts/${task.contact.id}`}
-            className={`self-end text-lg font-bold hover:underline ${
+            className={`self-start text-base font-semibold hover:underline ${
               contactPillColor(task.contact.id).match(/text-\S+/)?.[0] ?? ""
             }`}
           >
