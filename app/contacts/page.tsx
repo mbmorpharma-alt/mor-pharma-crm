@@ -51,6 +51,7 @@ type Contact = {
   status: string;
   whatsappSummary: string | null;
   tasks: Task[];
+  activities: { id: number; note: string }[];
 };
 
 export default function ContactsPage() {
@@ -246,6 +247,11 @@ export default function ContactsPage() {
                         📅
                       </button>
                     </div>
+                    {contact.activities[0] && (
+                      <div className="mt-1 text-xs text-green-700">
+                        {contact.activities[0].note}
+                      </div>
+                    )}
                   </TableCell>
                   <TableCell>
                     <Select
@@ -270,7 +276,12 @@ export default function ContactsPage() {
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1">
-                      <FollowUpMenu name={contact.name} phone={contact.phone ?? ""} />
+                      <FollowUpMenu
+                        contactId={contact.id}
+                        name={contact.name}
+                        phone={contact.phone ?? ""}
+                        onSent={load}
+                      />
                       <Button
                         variant="ghost"
                         size="sm"

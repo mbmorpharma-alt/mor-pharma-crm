@@ -5,11 +5,6 @@ export function toWhatsAppNumber(phone: string): string {
   return "972" + digits;
 }
 
-export function whatsappLink(phone: string, message: string): string {
-  const number = toWhatsAppNumber(phone);
-  return `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
-}
-
 export const followUpTemplates = [
   {
     id: "missing-details",

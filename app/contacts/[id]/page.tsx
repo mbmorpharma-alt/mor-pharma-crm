@@ -150,7 +150,12 @@ export default function ContactProfilePage({
           </Badge>
         </div>
         <div className="flex gap-2">
-          <FollowUpMenu name={contact.name} phone={contact.phone ?? ""} />
+          <FollowUpMenu
+            contactId={contact.id}
+            name={contact.name}
+            phone={contact.phone ?? ""}
+            onSent={load}
+          />
           <Button variant="outline" onClick={() => setDialogOpen(true)}>
             ✏️ עריכה
           </Button>
@@ -273,6 +278,14 @@ export default function ContactProfilePage({
               </button>
             </div>
           ))}
+          {(() => {
+            const lastFollowUp = contact.activities.find((a) => a.type === "פולו אפ");
+            return lastFollowUp ? (
+              <div className="rounded-md border border-green-200 bg-green-50 p-2 text-sm text-green-800">
+                {lastFollowUp.note}
+              </div>
+            ) : null;
+          })()}
         </CardContent>
       </Card>
 
