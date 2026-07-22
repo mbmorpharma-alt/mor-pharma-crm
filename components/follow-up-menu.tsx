@@ -15,11 +15,13 @@ export function FollowUpMenu({
   name,
   phone,
   onSent,
+  pill = false,
 }: {
   contactId: number;
   name: string;
   phone: string;
   onSent?: () => void;
+  pill?: boolean;
 }) {
   const [sending, setSending] = useState(false);
 
@@ -48,8 +50,17 @@ export function FollowUpMenu({
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <Button variant="ghost" size="sm" disabled={sending}>
-            {sending ? "שולח..." : "💬 פולו אפ"}
+          <Button
+            variant={pill ? "outline" : "ghost"}
+            size="sm"
+            disabled={sending}
+            className={
+              pill
+                ? "h-6 rounded-full border-green-300 bg-green-50 px-2 text-xs text-green-800 hover:bg-green-100"
+                : undefined
+            }
+          >
+            {sending ? "שולח..." : "🗨️ פולו אפ"}
           </Button>
         }
       />

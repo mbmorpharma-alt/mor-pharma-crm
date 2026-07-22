@@ -6,6 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { TaskFormDialog, TaskFormValues } from "@/components/task-form-dialog";
 import { FollowUpMenu } from "@/components/follow-up-menu";
+import { toWhatsAppNumber } from "@/lib/whatsapp";
 
 type Task = {
   id: number;
@@ -36,14 +37,47 @@ function dueTag(dueDate: string | null, completed: boolean) {
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const startOfTomorrow = new Date(startOfToday);
   startOfTomorrow.setDate(startOfTomorrow.getDate() + 1);
+  const startOfDayAfter = new Date(startOfTomorrow);
+  startOfDayAfter.setDate(startOfDayAfter.getDate() + 1);
 
   if (due < now) {
-    return <Badge className="bg-red-100 text-red-800">⚠️ באיחור</Badge>;
+    return (
+      <Badge className="bg-red-100 text-red-800">
+        ⚠️ באיחור ({due.toLocaleString("he-IL", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })})
+      </Badge>
+    );
   }
   if (due < startOfTomorrow) {
-    return <Badge className="bg-orange-100 text-orange-800">🔥 היום</Badge>;
+    return (
+      <Badge className="bg-orange-100 text-orange-800">
+        🔥 היום ({due.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" })})
+      </Badge>
+    );
   }
-  return <Badge className="bg-blue-100 text-blue-800">📅 מאוחר יותר</Badge>;
+  if (due < startOfDayAfter) {
+    return (
+      <Badge className="bg-purple-100 text-purple-800">
+        📅 מחר ({due.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" })})
+      </Badge>
+    );
+  }
+  return (
+    <Badge className="bg-blue-100 text-blue-800">
+      📅 {due.toLocaleString("he-IL", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })}
+    </Badge>
+  );
+}
+
+const CONTACT_PILL_COLORS = [
+  "border-violet-200 bg-violet-50 text-violet-800",
+  "border-pink-200 bg-pink-50 text-pink-800",
+  "border-emerald-200 bg-emerald-50 text-emerald-800",
+  "border-amber-200 bg-amber-50 text-amber-800",
+  "border-cyan-200 bg-cyan-50 text-cyan-800",
+];
+
+function contactPillColor(id: number) {
+  return CONTACT_PILL_COLORS[id % CONTACT_PILL_COLORS.length];
 }
 
 export default function TasksPage() {
@@ -98,64 +132,86 @@ export default function TasksPage() {
   const done = tasks.filter((t) => t.completed);
 
   function renderTask(task: Task) {
+    const isOverdue =
+      !task.completed && !!task.dueDate && new Date(task.dueDate) < new Date();
+
     return (
       <div
         key={task.id}
-        className="flex items-center gap-3 rounded-lg border bg-background p-3"
+        className={`flex flex-col gap-2 rounded-lg border bg-background p-3 ${
+          isOverdue ? "border-red-200 bg-red-50/40" : ""
+        }`}
       >
-        <Checkbox checked={task.completed} onCheckedChange={() => toggleCompleted(task)} />
-        <div className="flex-1">
-          <div className="flex items-center gap-2">
-            <span className={task.completed ? "line-through text-muted-foreground" : ""}>
-              {task.title}
-            </span>
-            {dueTag(task.dueDate, task.completed)}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <button onClick={() => deleteTask(task.id)} title="מחיקה" className="hover:text-foreground">
+              ✕
+            </button>
+            <button
+              onClick={() => {
+                setEditing({
+                  id: task.id,
+                  title: task.title,
+                  dueDate: toDatetimeLocal(task.dueDate),
+                  contactId: task.contact ? String(task.contact.id) : "",
+                });
+                setDialogOpen(true);
+              }}
+              title="עריכה"
+              className="hover:text-foreground"
+            >
+              ✏️
+            </button>
           </div>
-          <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
-            {task.contact && (
-              <a
-                href={`/contacts/${task.contact.id}`}
-                className="text-primary hover:underline"
-              >
-                {task.contact.name}
-              </a>
-            )}
-            {task.dueDate && (
-              <span>{new Date(task.dueDate).toLocaleString("he-IL")}</span>
-            )}
-          </div>
-          {task.contact?.activities[0] && (
-            <div className="mt-1 text-xs text-green-700">
-              {task.contact.activities[0].note}
-            </div>
+          <Checkbox checked={task.completed} onCheckedChange={() => toggleCompleted(task)} />
+        </div>
+
+        <div
+          className={`text-right font-medium ${
+            task.completed ? "line-through text-muted-foreground" : ""
+          }`}
+        >
+          {task.title}
+        </div>
+
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          {dueTag(task.dueDate, task.completed)}
+          {task.contact?.phone && (
+            <FollowUpMenu
+              contactId={task.contact.id}
+              name={task.contact.name}
+              phone={task.contact.phone}
+              onSent={load}
+              pill
+            />
+          )}
+          {task.contact?.phone && (
+            <a
+              href={`https://wa.me/${toWhatsAppNumber(task.contact.phone)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex h-6 items-center rounded-full border border-green-300 bg-green-50 px-2 text-xs text-green-800 hover:bg-green-100"
+            >
+              💬 וואטסאפ
+            </a>
+          )}
+          {task.contact && (
+            <a
+              href={`/contacts/${task.contact.id}`}
+              className={`inline-flex h-6 items-center rounded-full border px-2 text-xs hover:underline ${contactPillColor(
+                task.contact.id
+              )}`}
+            >
+              👤 {task.contact.name}
+            </a>
           )}
         </div>
-        {task.contact?.phone && (
-          <FollowUpMenu
-            contactId={task.contact.id}
-            name={task.contact.name}
-            phone={task.contact.phone}
-            onSent={load}
-          />
+
+        {task.contact?.activities[0] && (
+          <div className="rounded-md border border-green-200 bg-green-50 p-2 text-xs text-green-800">
+            {task.contact.activities[0].note}
+          </div>
         )}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => {
-            setEditing({
-              id: task.id,
-              title: task.title,
-              dueDate: toDatetimeLocal(task.dueDate),
-              contactId: task.contact ? String(task.contact.id) : "",
-            });
-            setDialogOpen(true);
-          }}
-        >
-          ✏️
-        </Button>
-        <Button variant="ghost" size="sm" onClick={() => deleteTask(task.id)}>
-          ✕
-        </Button>
       </div>
     );
   }
