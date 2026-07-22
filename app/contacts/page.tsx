@@ -25,6 +25,15 @@ import { ContactFormDialog, ContactFormValues } from "@/components/contact-form-
 import { FollowUpMenu } from "@/components/follow-up-menu";
 import { TaskFormDialog, TaskFormValues } from "@/components/task-form-dialog";
 
+function toDatetimeLocal(iso: string | null) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(
+    d.getHours()
+  )}:${pad(d.getMinutes())}`;
+}
+
 type Task = {
   id: number;
   title: string;
@@ -202,6 +211,21 @@ export default function ContactsPage() {
                             className="text-green-600 hover:text-green-800"
                           >
                             ✓
+                          </button>
+                          <button
+                            onClick={() => {
+                              setTaskForContact({
+                                id: nextTask.id,
+                                title: nextTask.title,
+                                dueDate: toDatetimeLocal(nextTask.dueDate),
+                                contactId: String(contact.id),
+                              });
+                              setTaskDialogOpen(true);
+                            }}
+                            title="עריכה"
+                            className="text-muted-foreground hover:text-foreground"
+                          >
+                            ✏️
                           </button>
                         </>
                       ) : (
