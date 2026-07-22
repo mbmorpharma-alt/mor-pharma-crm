@@ -6,7 +6,15 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   const tasks = await prisma.task.findMany({
     include: {
-      contact: true,
+      contact: {
+        include: {
+          activities: {
+            where: { type: "פולו אפ" },
+            orderBy: { createdAt: "desc" },
+            take: 1,
+          },
+        },
+      },
       deal: true,
     },
     orderBy: { dueDate: "asc" },

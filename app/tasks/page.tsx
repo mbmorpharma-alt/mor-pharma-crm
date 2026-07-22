@@ -5,13 +5,19 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { TaskFormDialog, TaskFormValues } from "@/components/task-form-dialog";
+import { FollowUpMenu } from "@/components/follow-up-menu";
 
 type Task = {
   id: number;
   title: string;
   dueDate: string | null;
   completed: boolean;
-  contact: { id: number; name: string } | null;
+  contact: {
+    id: number;
+    name: string;
+    phone: string | null;
+    activities: { id: number; note: string }[];
+  } | null;
 };
 
 function toDatetimeLocal(iso: string | null) {
@@ -118,7 +124,20 @@ export default function TasksPage() {
               <span>{new Date(task.dueDate).toLocaleString("he-IL")}</span>
             )}
           </div>
+          {task.contact?.activities[0] && (
+            <div className="mt-1 text-xs text-green-700">
+              {task.contact.activities[0].note}
+            </div>
+          )}
         </div>
+        {task.contact?.phone && (
+          <FollowUpMenu
+            contactId={task.contact.id}
+            name={task.contact.name}
+            phone={task.contact.phone}
+            onSent={load}
+          />
+        )}
         <Button
           variant="ghost"
           size="sm"
