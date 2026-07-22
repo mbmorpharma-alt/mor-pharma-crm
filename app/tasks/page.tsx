@@ -166,6 +166,17 @@ export default function TasksPage() {
           <Checkbox checked={task.completed} onCheckedChange={() => toggleCompleted(task)} />
         </div>
 
+        {task.contact && (
+          <a
+            href={`/contacts/${task.contact.id}`}
+            className={`self-end text-lg font-bold hover:underline ${
+              contactPillColor(task.contact.id).match(/text-\S+/)?.[0] ?? ""
+            }`}
+          >
+            👤 {task.contact.name}
+          </a>
+        )}
+
         <div
           className={`text-right font-medium ${
             task.completed ? "line-through text-muted-foreground" : ""
@@ -195,16 +206,6 @@ export default function TasksPage() {
               💬 וואטסאפ
             </a>
           )}
-          {task.contact && (
-            <a
-              href={`/contacts/${task.contact.id}`}
-              className={`inline-flex h-6 items-center rounded-full border px-2 text-xs hover:underline ${contactPillColor(
-                task.contact.id
-              )}`}
-            >
-              👤 {task.contact.name}
-            </a>
-          )}
         </div>
 
         {task.contact?.activities[0] && (
@@ -217,7 +218,7 @@ export default function TasksPage() {
   }
 
   return (
-    <div dir="rtl" className="mx-auto max-w-3xl p-4 flex flex-col gap-4">
+    <div dir="rtl" className="mx-auto w-full max-w-none p-4 flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">משימות</h1>
         <Button
