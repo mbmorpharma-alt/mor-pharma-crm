@@ -179,9 +179,11 @@ export default function ContactsPage() {
           <TableHeader>
             <TableRow>
               <TableHead>שם</TableHead>
+              <TableHead>חדש/קיים</TableHead>
               <TableHead>טלפון</TableHead>
               <TableHead>הצטרף בתאריך</TableHead>
               <TableHead>משימה קרובה</TableHead>
+              <TableHead>שם העסק</TableHead>
               <TableHead>סטטוס</TableHead>
               <TableHead>פעולות</TableHead>
             </TableRow>
@@ -189,14 +191,14 @@ export default function ContactsPage() {
           <TableBody>
             {loading && (
               <TableRow>
-                <TableCell colSpan={6} className="text-center text-muted-foreground">
+                <TableCell colSpan={8} className="text-center text-muted-foreground">
                   טוען...
                 </TableCell>
               </TableRow>
             )}
             {!loading && contacts.length === 0 && (
               <TableRow>
-                <TableCell colSpan={6} className="text-center text-muted-foreground">
+                <TableCell colSpan={8} className="text-center text-muted-foreground">
                   לא נמצאו אנשי קשר
                 </TableCell>
               </TableRow>
@@ -206,54 +208,28 @@ export default function ContactsPage() {
               return (
                 <TableRow key={contact.id}>
                   <TableCell>
-                    <div className="flex items-center gap-1.5">
-                      <button
-                        onClick={() => toggleCustomerType(contact.id)}
-                        title="לחיצה להחלפה בין לקוח חדש לקיים"
+                    <a
+                      href={`/contacts/${contact.id}`}
+                      className="font-medium text-primary hover:underline"
+                    >
+                      {contact.name}
+                    </a>
+                  </TableCell>
+                  <TableCell>
+                    <button
+                      onClick={() => toggleCustomerType(contact.id)}
+                      title="לחיצה להחלפה בין לקוח חדש לקיים"
+                    >
+                      <Badge
+                        className={
+                          contact.isExistingCustomer
+                            ? "bg-purple-100 text-purple-800"
+                            : "bg-blue-100 text-blue-800"
+                        }
                       >
-                        <Badge
-                          className={
-                            contact.isExistingCustomer
-                              ? "bg-purple-100 text-purple-800"
-                              : "bg-blue-100 text-blue-800"
-                          }
-                        >
-                          {contact.isExistingCustomer ? "🔁 קיים" : "🆕 חדש"}
-                        </Badge>
-                      </button>
-                      <a
-                        href={`/contacts/${contact.id}`}
-                        className="font-medium text-primary hover:underline"
-                      >
-                        {contact.name}
-                      </a>
-                    </div>
-                    {companyEditId === contact.id ? (
-                      <Input
-                        autoFocus
-                        value={companyDraft}
-                        onChange={(e) => setCompanyDraft(e.target.value)}
-                        onBlur={() => saveCompany(contact.id)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") saveCompany(contact.id);
-                          if (e.key === "Escape") setCompanyEditId(null);
-                        }}
-                        className="mt-1 h-6 w-40 text-xs"
-                      />
-                    ) : (
-                      <button
-                        onClick={() => {
-                          setCompanyEditId(contact.id);
-                          setCompanyDraft(contact.company ?? "");
-                        }}
-                        title="לחיצה לעריכת שם העסק"
-                        className="mt-1"
-                      >
-                        <Badge variant="outline" className="text-xs text-muted-foreground">
-                          🏢 {contact.company || "הוסף עסק"}
-                        </Badge>
-                      </button>
-                    )}
+                        {contact.isExistingCustomer ? "🔁 קיים" : "🆕 חדש"}
+                      </Badge>
+                    </button>
                   </TableCell>
                   <TableCell>
                     {contact.phone ? (
@@ -325,6 +301,33 @@ export default function ContactsPage() {
                       <div className="mt-1 text-xs text-green-700">
                         {contact.activities[0].note}
                       </div>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {companyEditId === contact.id ? (
+                      <Input
+                        autoFocus
+                        value={companyDraft}
+                        onChange={(e) => setCompanyDraft(e.target.value)}
+                        onBlur={() => saveCompany(contact.id)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") saveCompany(contact.id);
+                          if (e.key === "Escape") setCompanyEditId(null);
+                        }}
+                        className="h-6 w-40 text-xs"
+                      />
+                    ) : (
+                      <button
+                        onClick={() => {
+                          setCompanyEditId(contact.id);
+                          setCompanyDraft(contact.company ?? "");
+                        }}
+                        title="לחיצה לעריכת שם העסק"
+                      >
+                        <Badge variant="outline" className="text-xs text-muted-foreground">
+                          🏢 {contact.company || "הוסף עסק"}
+                        </Badge>
+                      </button>
                     )}
                   </TableCell>
                   <TableCell>
