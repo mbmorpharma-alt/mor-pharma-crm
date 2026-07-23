@@ -45,19 +45,25 @@ function dueTag(dueDate: string | null, completed: boolean) {
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const startOfTomorrow = new Date(startOfToday);
   startOfTomorrow.setDate(startOfTomorrow.getDate() + 1);
-  const startOfDayAfter = new Date(startOfTomorrow);
-  startOfDayAfter.setDate(startOfDayAfter.getDate() + 1);
+
+  const time = due.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" });
+  const date = due.toLocaleDateString("he-IL", { day: "numeric", month: "long" });
 
   if (due < now) {
-    return <Badge className="bg-red-100 text-red-800">⚠️ באיחור</Badge>;
+    return (
+      <Badge className="bg-red-100 text-red-800">
+        ⚠️ באיחור {date} {time}
+      </Badge>
+    );
   }
   if (due < startOfTomorrow) {
-    return <Badge className="bg-orange-100 text-orange-800">🔥 היום</Badge>;
+    return <Badge className="bg-orange-100 text-orange-800">🔥 היום {time}</Badge>;
   }
-  if (due < startOfDayAfter) {
-    return <Badge className="bg-purple-100 text-purple-800">📅 מחר</Badge>;
-  }
-  return <Badge className="bg-blue-100 text-blue-800">📅 מאוחר יותר</Badge>;
+  return (
+    <Badge className="bg-blue-100 text-blue-800">
+      📅 {date} {time}
+    </Badge>
+  );
 }
 
 const CONTACT_PILL_COLORS = [
