@@ -181,7 +181,6 @@ export default function ContactsPage() {
               <TableHead>שם</TableHead>
               <TableHead>חדש/קיים</TableHead>
               <TableHead>טלפון</TableHead>
-              <TableHead>הצטרף בתאריך</TableHead>
               <TableHead>משימה קרובה</TableHead>
               <TableHead>שם העסק</TableHead>
               <TableHead>סטטוס</TableHead>
@@ -191,14 +190,14 @@ export default function ContactsPage() {
           <TableBody>
             {loading && (
               <TableRow>
-                <TableCell colSpan={8} className="text-center text-muted-foreground">
+                <TableCell colSpan={7} className="text-center text-muted-foreground">
                   טוען...
                 </TableCell>
               </TableRow>
             )}
             {!loading && contacts.length === 0 && (
               <TableRow>
-                <TableCell colSpan={8} className="text-center text-muted-foreground">
+                <TableCell colSpan={7} className="text-center text-muted-foreground">
                   לא נמצאו אנשי קשר
                 </TableCell>
               </TableRow>
@@ -247,9 +246,6 @@ export default function ContactsPage() {
                     ) : (
                       <span className="text-muted-foreground">—</span>
                     )}
-                  </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    {new Date(contact.createdAt).toLocaleDateString("he-IL")}
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
