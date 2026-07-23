@@ -154,8 +154,8 @@ export default function ContactProfilePage({
             <Badge
               className={
                 contact.isExistingCustomer
-                  ? "bg-purple-100 text-purple-800"
-                  : "bg-blue-100 text-blue-800"
+                  ? "h-6 px-2.5 text-sm bg-red-100 text-red-800"
+                  : "h-6 px-2.5 text-sm bg-blue-100 text-blue-800"
               }
             >
               {contact.isExistingCustomer ? "🔁 קיים" : "🆕 חדש"}
