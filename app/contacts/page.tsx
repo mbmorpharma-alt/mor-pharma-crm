@@ -49,6 +49,7 @@ type Contact = {
   company: string | null;
   notes: string | null;
   status: string;
+  isExistingCustomer: boolean;
   whatsappSummary: string | null;
   tasks: Task[];
   activities: { id: number; note: string }[];
@@ -63,6 +64,8 @@ export default function ContactsPage() {
   const [editing, setEditing] = useState<ContactFormValues | null>(null);
   const [taskDialogOpen, setTaskDialogOpen] = useState(false);
   const [taskForContact, setTaskForContact] = useState<TaskFormValues | null>(null);
+  const [companyEditId, setCompanyEditId] = useState<number | null>(null);
+  const [companyDraft, setCompanyDraft] = useState("");
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -86,6 +89,33 @@ export default function ContactsPage() {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ...contacts.find((c) => c.id === id), status }),
+    });
+  }
+
+  async function toggleCustomerType(id: number) {
+    const current = contacts.find((c) => c.id === id);
+    if (!current) return;
+    const isExistingCustomer = !current.isExistingCustomer;
+    setContacts((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, isExistingCustomer } : c))
+    );
+    await fetch(`/api/contacts/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...current, isExistingCustomer }),
+    });
+  }
+
+  async function saveCompany(id: number) {
+    const current = contacts.find((c) => c.id === id);
+    setCompanyEditId(null);
+    if (!current) return;
+    const company = companyDraft.trim() || null;
+    setContacts((prev) => prev.map((c) => (c.id === id ? { ...c, company } : c)));
+    await fetch(`/api/contacts/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...current, company }),
     });
   }
 
@@ -174,14 +204,53 @@ export default function ContactsPage() {
               return (
                 <TableRow key={contact.id}>
                   <TableCell>
-                    <a
-                      href={`/contacts/${contact.id}`}
-                      className="font-medium text-primary hover:underline"
-                    >
-                      {contact.name}
-                    </a>
-                    {contact.company && (
-                      <div className="text-xs text-muted-foreground">{contact.company}</div>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={() => toggleCustomerType(contact.id)}
+                        title="לחיצה להחלפה בין לקוח חדש לקיים"
+                      >
+                        <Badge
+                          className={
+                            contact.isExistingCustomer
+                              ? "bg-purple-100 text-purple-800"
+                              : "bg-blue-100 text-blue-800"
+                          }
+                        >
+                          {contact.isExistingCustomer ? "🔁 קיים" : "🆕 חדש"}
+                        </Badge>
+                      </button>
+                      <a
+                        href={`/contacts/${contact.id}`}
+                        className="font-medium text-primary hover:underline"
+                      >
+                        {contact.name}
+                      </a>
+                    </div>
+                    {companyEditId === contact.id ? (
+                      <Input
+                        autoFocus
+                        value={companyDraft}
+                        onChange={(e) => setCompanyDraft(e.target.value)}
+                        onBlur={() => saveCompany(contact.id)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") saveCompany(contact.id);
+                          if (e.key === "Escape") setCompanyEditId(null);
+                        }}
+                        className="mt-1 h-6 w-40 text-xs"
+                      />
+                    ) : (
+                      <button
+                        onClick={() => {
+                          setCompanyEditId(contact.id);
+                          setCompanyDraft(contact.company ?? "");
+                        }}
+                        title="לחיצה לעריכת שם העסק"
+                        className="mt-1"
+                      >
+                        <Badge variant="outline" className="text-xs text-muted-foreground">
+                          🏢 {contact.company || "הוסף עסק"}
+                        </Badge>
+                      </button>
                     )}
                   </TableCell>
                   <TableCell>
@@ -294,6 +363,7 @@ export default function ContactsPage() {
                             company: contact.company ?? "",
                             notes: contact.notes ?? "",
                             status: contact.status,
+                            isExistingCustomer: contact.isExistingCustomer,
                             whatsappSummary: contact.whatsappSummary ?? "",
                           });
                           setDialogOpen(true);

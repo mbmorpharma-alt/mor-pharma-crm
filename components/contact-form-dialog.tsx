@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -29,6 +30,7 @@ export type ContactFormValues = {
   company: string;
   notes: string;
   status: string;
+  isExistingCustomer: boolean;
   whatsappSummary: string;
 };
 
@@ -39,6 +41,7 @@ const EMPTY: ContactFormValues = {
   company: "",
   notes: "",
   status: "חדש",
+  isExistingCustomer: false,
   whatsappSummary: "",
 };
 
@@ -121,6 +124,16 @@ export function ContactFormDialog({
                 value={values.company}
                 onChange={(e) => setValues({ ...values, company: e.target.value })}
               />
+            </div>
+            <div className="col-span-2 flex items-center gap-2">
+              <Checkbox
+                id="isExistingCustomer"
+                checked={values.isExistingCustomer}
+                onCheckedChange={(checked) =>
+                  setValues({ ...values, isExistingCustomer: checked === true })
+                }
+              />
+              <Label htmlFor="isExistingCustomer">לקוח קיים (לא חדש)</Label>
             </div>
             <div className="col-span-2">
               <Label htmlFor="status">סטטוס</Label>

@@ -53,6 +53,7 @@ export async function POST(request: NextRequest) {
       company: body.company || null,
       notes: body.notes || null,
       status: body.status || "חדש",
+      isExistingCustomer: body.isExistingCustomer ?? false,
       bookCount: body.bookCount || null,
       whatsappSummary: body.whatsappSummary || null,
     },

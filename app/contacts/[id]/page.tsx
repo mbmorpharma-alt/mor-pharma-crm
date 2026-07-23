@@ -51,6 +51,7 @@ type ContactDetail = {
   company: string | null;
   notes: string | null;
   status: string;
+  isExistingCustomer: boolean;
   whatsappSummary: string | null;
   deals: Deal[];
   tasks: Task[];
@@ -134,6 +135,7 @@ export default function ContactProfilePage({
     company: contact.company ?? "",
     notes: contact.notes ?? "",
     status: contact.status,
+    isExistingCustomer: contact.isExistingCustomer,
     whatsappSummary: contact.whatsappSummary ?? "",
   };
 
@@ -145,9 +147,20 @@ export default function ContactProfilePage({
           {contact.company && (
             <p className="text-muted-foreground">{contact.company}</p>
           )}
-          <Badge className={`mt-2 ${STATUS_COLORS[contact.status] ?? ""}`}>
-            {contact.status}
-          </Badge>
+          <div className="mt-2 flex gap-2">
+            <Badge className={STATUS_COLORS[contact.status] ?? ""}>
+              {contact.status}
+            </Badge>
+            <Badge
+              className={
+                contact.isExistingCustomer
+                  ? "bg-purple-100 text-purple-800"
+                  : "bg-blue-100 text-blue-800"
+              }
+            >
+              {contact.isExistingCustomer ? "🔁 קיים" : "🆕 חדש"}
+            </Badge>
+          </div>
         </div>
         <div className="flex gap-2">
           <FollowUpMenu
