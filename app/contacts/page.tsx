@@ -51,6 +51,7 @@ type Contact = {
   status: string;
   isExistingCustomer: boolean;
   whatsappSummary: string | null;
+  createdAt: string;
   tasks: Task[];
   activities: { id: number; note: string }[];
 };
@@ -179,6 +180,7 @@ export default function ContactsPage() {
             <TableRow>
               <TableHead>שם</TableHead>
               <TableHead>טלפון</TableHead>
+              <TableHead>הצטרף בתאריך</TableHead>
               <TableHead>משימה קרובה</TableHead>
               <TableHead>סטטוס</TableHead>
               <TableHead>פעולות</TableHead>
@@ -187,14 +189,14 @@ export default function ContactsPage() {
           <TableBody>
             {loading && (
               <TableRow>
-                <TableCell colSpan={5} className="text-center text-muted-foreground">
+                <TableCell colSpan={6} className="text-center text-muted-foreground">
                   טוען...
                 </TableCell>
               </TableRow>
             )}
             {!loading && contacts.length === 0 && (
               <TableRow>
-                <TableCell colSpan={5} className="text-center text-muted-foreground">
+                <TableCell colSpan={6} className="text-center text-muted-foreground">
                   לא נמצאו אנשי קשר
                 </TableCell>
               </TableRow>
@@ -269,6 +271,9 @@ export default function ContactsPage() {
                     ) : (
                       <span className="text-muted-foreground">—</span>
                     )}
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {new Date(contact.createdAt).toLocaleDateString("he-IL")}
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
