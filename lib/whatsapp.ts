@@ -9,8 +9,7 @@ export const followUpTemplates = [
   {
     id: "missing-details",
     label: "חסרים פרטים",
-    build: (name: string) =>
-      `היי ${name}, עדיין חסרים לנו כמה פרטים - אשמח לקבל אותם בהקדם :)`,
+    build: () => `היי, יצא לך לעבור על הקטלוג צריך הזמנה?`,
   },
   {
     id: "closing",
