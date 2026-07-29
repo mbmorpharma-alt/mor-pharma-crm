@@ -337,7 +337,7 @@ export default function ContactsPage() {
                       </div>
                     )}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="max-w-[160px] pe-0">
                     {companyEditId === contact.id ? (
                       <Input
                         autoFocus
@@ -358,13 +358,16 @@ export default function ContactsPage() {
                         }}
                         title="לחיצה לעריכת שם העסק"
                       >
-                        <Badge variant="outline" className="text-xs text-muted-foreground">
+                        <Badge
+                          variant="outline"
+                          className="max-w-[140px] truncate text-xs text-muted-foreground"
+                        >
                           🏢 {contact.company || "הוסף עסק"}
                         </Badge>
                       </button>
                     )}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="ps-0">
                     <Select
                       value={contact.status}
                       onValueChange={(v) => updateStatus(contact.id, v || contact.status)}
