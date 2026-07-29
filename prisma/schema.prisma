@@ -46,6 +46,7 @@ model Task {
   dealId    Int?
   deal      Deal?     @relation(fields: [dealId], references: [id], onDelete: SetNull)
   createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now()) @updatedAt
 }
 
 model Activity {

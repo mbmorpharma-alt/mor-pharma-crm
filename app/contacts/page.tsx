@@ -39,7 +39,15 @@ type Task = {
   title: string;
   dueDate: string | null;
   completed: boolean;
+  updatedAt: string;
 };
+
+function formatDateTime(iso: string) {
+  const d = new Date(iso);
+  const date = d.toLocaleDateString("he-IL", { day: "numeric", month: "numeric" });
+  const time = d.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" });
+  return `${date} ${time}`;
+}
 
 type Contact = {
   id: number;
@@ -74,7 +82,12 @@ export default function ContactsPage() {
     if (search) params.set("search", search);
     if (statusFilter) params.set("status", statusFilter);
     const res = await fetch(`/api/contacts?${params.toString()}`);
-    const data = await res.json();
+    const data: Contact[] = await res.json();
+    data.sort((a, b) => {
+      const aTime = new Date(a.tasks[0]?.updatedAt ?? a.createdAt).getTime();
+      const bTime = new Date(b.tasks[0]?.updatedAt ?? b.createdAt).getTime();
+      return bTime - aTime;
+    });
     setContacts(data);
     setLoading(false);
   }, [search, statusFilter]);
@@ -292,6 +305,11 @@ export default function ContactsPage() {
                       >
                         📅
                       </button>
+                      {nextTask && (
+                        <span className="text-xs text-muted-foreground">
+                          {formatDateTime(nextTask.updatedAt)}
+                        </span>
+                      )}
                     </div>
                     {contact.activities[0] && (
                       <div className="mt-1 text-xs text-green-700">
