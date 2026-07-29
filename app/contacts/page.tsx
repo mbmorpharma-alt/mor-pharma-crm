@@ -42,13 +42,6 @@ type Task = {
   updatedAt: string;
 };
 
-function formatDateTime(iso: string) {
-  const d = new Date(iso);
-  const date = d.toLocaleDateString("he-IL", { day: "numeric", month: "numeric" });
-  const time = d.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" });
-  return `${date} ${time}`;
-}
-
 function formatJoinDate(iso: string) {
   const d = new Date(iso);
   const date = d.toLocaleDateString("he-IL", { day: "numeric", month: "long" });
@@ -202,6 +195,7 @@ export default function ContactsPage() {
               <TableHead>חדש/קיים</TableHead>
               <TableHead>טלפון</TableHead>
               <TableHead>משימה קרובה</TableHead>
+              <TableHead>תאריך שינוי משימה</TableHead>
               <TableHead>שם העסק</TableHead>
               <TableHead>סטטוס</TableHead>
               <TableHead>פעולות</TableHead>
@@ -210,14 +204,14 @@ export default function ContactsPage() {
           <TableBody>
             {loading && (
               <TableRow>
-                <TableCell colSpan={7} className="text-center text-muted-foreground">
+                <TableCell colSpan={8} className="text-center text-muted-foreground">
                   טוען...
                 </TableCell>
               </TableRow>
             )}
             {!loading && contacts.length === 0 && (
               <TableRow>
-                <TableCell colSpan={7} className="text-center text-muted-foreground">
+                <TableCell colSpan={8} className="text-center text-muted-foreground">
                   לא נמצאו אנשי קשר
                 </TableCell>
               </TableRow>
@@ -322,15 +316,22 @@ export default function ContactsPage() {
                       >
                         📅
                       </button>
-                      {nextTask && (
-                        <span className="text-xs font-semibold text-foreground">
-                          {formatDateTime(nextTask.updatedAt)}
-                        </span>
-                      )}
                     </div>
                     {contact.activities[0] && (
                       <div className="mt-1 text-xs text-green-700">
                         {contact.activities[0].note}
+                      </div>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {nextTask && (
+                      <div className="text-xs font-semibold text-foreground">
+                        <div>
+                          תאריך - {new Date(nextTask.updatedAt).toLocaleDateString("he-IL", { day: "numeric", month: "long" })}
+                        </div>
+                        <div>
+                          שעה - {new Date(nextTask.updatedAt).toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" })}
+                        </div>
                       </div>
                     )}
                   </TableCell>
