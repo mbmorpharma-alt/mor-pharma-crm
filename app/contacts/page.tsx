@@ -188,17 +188,17 @@ export default function ContactsPage() {
       </div>
 
       <div className="rounded-lg border bg-background">
-        <Table>
+        <Table className="table-fixed">
           <TableHeader>
             <TableRow>
-              <TableHead>שם</TableHead>
-              <TableHead>חדש/קיים</TableHead>
-              <TableHead>טלפון</TableHead>
+              <TableHead className="w-32">שם</TableHead>
+              <TableHead className="w-20">חדש/קיים</TableHead>
+              <TableHead className="w-32">טלפון</TableHead>
               <TableHead>משימה קרובה</TableHead>
-              <TableHead className="ps-0">תאריך שינוי משימה</TableHead>
-              <TableHead>שם העסק</TableHead>
-              <TableHead>סטטוס</TableHead>
-              <TableHead>פעולות</TableHead>
+              <TableHead className="w-28 ps-0">תאריך שינוי משימה</TableHead>
+              <TableHead className="w-32">שם העסק</TableHead>
+              <TableHead className="w-32">סטטוס</TableHead>
+              <TableHead className="w-28">פעולות</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -227,7 +227,7 @@ export default function ContactsPage() {
                       : ""
                   }
                 >
-                  <TableCell>
+                  <TableCell className="whitespace-normal">
                     <a
                       href={`/contacts/${contact.id}`}
                       className="font-medium text-primary hover:underline"
@@ -254,7 +254,7 @@ export default function ContactsPage() {
                       </Badge>
                     </button>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="whitespace-normal">
                     {contact.phone ? (
                       <div className="flex items-center gap-2">
                         <span>{contact.phone}</span>
@@ -271,11 +271,11 @@ export default function ContactsPage() {
                       <span className="text-muted-foreground">—</span>
                     )}
                   </TableCell>
-                  <TableCell className="max-w-[220px]">
+                  <TableCell className="whitespace-normal">
                     <div className="flex items-center gap-2">
                       {nextTask ? (
                         <>
-                          <span className="text-sm truncate max-w-[140px]" title={nextTask.title}>
+                          <span className="text-sm break-words" title={nextTask.title}>
                             {nextTask.title}
                           </span>
                           <button
@@ -325,7 +325,7 @@ export default function ContactsPage() {
                       </div>
                     )}
                   </TableCell>
-                  <TableCell className="ps-0">
+                  <TableCell className="whitespace-normal ps-0">
                     {nextTask && (
                       <div className="text-xs font-semibold text-foreground">
                         <div>
