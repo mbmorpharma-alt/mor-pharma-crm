@@ -191,14 +191,14 @@ export default function ContactsPage() {
         <Table className="table-fixed">
           <TableHeader>
             <TableRow>
-              <TableHead className="w-32">שם</TableHead>
-              <TableHead className="w-20">חדש/קיים</TableHead>
-              <TableHead className="w-32">טלפון</TableHead>
+              <TableHead className="w-40">שם</TableHead>
+              <TableHead className="w-24">חדש/קיים</TableHead>
+              <TableHead className="w-36">טלפון</TableHead>
               <TableHead>משימה קרובה</TableHead>
-              <TableHead className="w-28 ps-0">תאריך שינוי משימה</TableHead>
-              <TableHead className="w-32">שם העסק</TableHead>
-              <TableHead className="w-32">סטטוס</TableHead>
-              <TableHead className="w-28">פעולות</TableHead>
+              <TableHead className="w-36 ps-0">תאריך שינוי משימה</TableHead>
+              <TableHead className="w-40">שם העסק</TableHead>
+              <TableHead className="w-40">סטטוס</TableHead>
+              <TableHead className="w-36">פעולות</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
