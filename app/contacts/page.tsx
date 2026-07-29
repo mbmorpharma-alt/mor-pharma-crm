@@ -389,12 +389,13 @@ export default function ContactsPage() {
                     </Select>
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-1">
+                    <div className="flex flex-wrap items-center gap-1">
                       <FollowUpMenu
                         contactId={contact.id}
                         name={contact.name}
                         phone={contact.phone ?? ""}
                         onSent={load}
+                        pill
                       />
                       <Button
                         variant="ghost"
