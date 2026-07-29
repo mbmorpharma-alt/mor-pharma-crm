@@ -271,11 +271,13 @@ export default function ContactsPage() {
                       <span className="text-muted-foreground">—</span>
                     )}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="max-w-[220px]">
                     <div className="flex items-center gap-2">
                       {nextTask ? (
                         <>
-                          <span className="text-sm">{nextTask.title}</span>
+                          <span className="text-sm truncate max-w-[140px]" title={nextTask.title}>
+                            {nextTask.title}
+                          </span>
                           <button
                             onClick={() => completeTask(nextTask.id)}
                             title="סמן כהושלם"
