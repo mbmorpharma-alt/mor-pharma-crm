@@ -191,14 +191,14 @@ export default function ContactsPage() {
         <Table className="table-fixed">
           <TableHeader>
             <TableRow>
-              <TableHead className="w-40">שם</TableHead>
-              <TableHead className="w-24">חדש/קיים</TableHead>
-              <TableHead className="w-36">טלפון</TableHead>
+              <TableHead className="w-28">שם</TableHead>
+              <TableHead className="w-20">חדש/קיים</TableHead>
+              <TableHead className="w-28">טלפון</TableHead>
               <TableHead>משימה קרובה</TableHead>
-              <TableHead className="w-36 ps-0">תאריך שינוי משימה</TableHead>
-              <TableHead className="w-40">שם העסק</TableHead>
-              <TableHead className="w-40">סטטוס</TableHead>
-              <TableHead className="w-36">פעולות</TableHead>
+              <TableHead className="w-24 ps-0">תאריך שינוי משימה</TableHead>
+              <TableHead className="w-28">שם העסק</TableHead>
+              <TableHead className="w-32">סטטוס</TableHead>
+              <TableHead className="w-28">פעולות</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -337,7 +337,7 @@ export default function ContactsPage() {
                       </div>
                     )}
                   </TableCell>
-                  <TableCell className="max-w-[160px] pe-0">
+                  <TableCell className="pe-0">
                     {companyEditId === contact.id ? (
                       <Input
                         autoFocus
@@ -348,7 +348,7 @@ export default function ContactsPage() {
                           if (e.key === "Enter") saveCompany(contact.id);
                           if (e.key === "Escape") setCompanyEditId(null);
                         }}
-                        className="h-6 w-40 text-xs"
+                        className="h-6 w-full text-xs"
                       />
                     ) : (
                       <button
@@ -360,7 +360,7 @@ export default function ContactsPage() {
                       >
                         <Badge
                           variant="outline"
-                          className="max-w-[140px] truncate text-xs text-muted-foreground"
+                          className="max-w-full truncate text-xs text-muted-foreground"
                         >
                           🏢 {contact.company || "הוסף עסק"}
                         </Badge>
@@ -372,7 +372,7 @@ export default function ContactsPage() {
                       value={contact.status}
                       onValueChange={(v) => updateStatus(contact.id, v || contact.status)}
                     >
-                      <SelectTrigger className="w-36">
+                      <SelectTrigger className="w-full">
                         <SelectValue>
                           <Badge className={STATUS_COLORS[contact.status] ?? ""}>
                             {contact.status}
