@@ -49,6 +49,13 @@ function formatDateTime(iso: string) {
   return `${date} ${time}`;
 }
 
+function formatJoinDate(iso: string) {
+  const d = new Date(iso);
+  const date = d.toLocaleDateString("he-IL", { day: "numeric", month: "long" });
+  const time = d.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" });
+  return `${date}, ${time}`;
+}
+
 type Contact = {
   id: number;
   name: string;
@@ -229,6 +236,9 @@ export default function ContactsPage() {
                     >
                       {contact.name}
                     </a>
+                    <div className="text-xs text-muted-foreground">
+                      {formatJoinDate(contact.createdAt)}
+                    </div>
                   </TableCell>
                   <TableCell>
                     <button
