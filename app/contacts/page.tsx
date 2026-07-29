@@ -227,7 +227,11 @@ export default function ContactsPage() {
               return (
                 <TableRow
                   key={contact.id}
-                  className={contact.status === "✅ סגור" ? "bg-green-50" : ""}
+                  className={
+                    contact.status === "✅ סגור"
+                      ? "bg-green-100 hover:bg-green-100"
+                      : ""
+                  }
                 >
                   <TableCell>
                     <a
