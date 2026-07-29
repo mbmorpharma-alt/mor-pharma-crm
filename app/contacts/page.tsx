@@ -227,14 +227,14 @@ export default function ContactsPage() {
                       : ""
                   }
                 >
-                  <TableCell className="whitespace-normal">
+                  <TableCell className="whitespace-normal overflow-hidden">
                     <a
                       href={`/contacts/${contact.id}`}
                       className="font-medium text-primary hover:underline"
                     >
                       {contact.name}
                     </a>
-                    <div className="text-xs text-muted-foreground">
+                    <div className="truncate text-xs text-muted-foreground">
                       {formatJoinDate(contact.createdAt)}
                     </div>
                   </TableCell>
@@ -254,10 +254,10 @@ export default function ContactsPage() {
                       </Badge>
                     </button>
                   </TableCell>
-                  <TableCell className="whitespace-normal">
+                  <TableCell className="whitespace-normal overflow-hidden">
                     {contact.phone ? (
-                      <div className="flex items-center gap-2">
-                        <span>{contact.phone}</span>
+                      <div className="flex min-w-0 items-center gap-1">
+                        <span className="truncate">{contact.phone}</span>
                         <a
                           href={`https://wa.me/${toWhatsAppNumber(contact.phone)}`}
                           target="_blank"
@@ -271,11 +271,11 @@ export default function ContactsPage() {
                       <span className="text-muted-foreground">—</span>
                     )}
                   </TableCell>
-                  <TableCell className="whitespace-normal">
-                    <div className="flex items-center gap-2">
+                  <TableCell className="whitespace-normal overflow-hidden">
+                    <div className="flex min-w-0 items-center gap-1">
                       {nextTask ? (
                         <>
-                          <span className="text-sm break-words" title={nextTask.title}>
+                          <span className="min-w-0 flex-1 truncate text-sm" title={nextTask.title}>
                             {nextTask.title}
                           </span>
                           <button
@@ -325,7 +325,7 @@ export default function ContactsPage() {
                       </div>
                     )}
                   </TableCell>
-                  <TableCell className="whitespace-normal ps-0">
+                  <TableCell className="whitespace-normal overflow-hidden ps-0">
                     {nextTask && (
                       <div className="text-xs font-semibold text-foreground">
                         <div>
@@ -337,7 +337,7 @@ export default function ContactsPage() {
                       </div>
                     )}
                   </TableCell>
-                  <TableCell className="pe-0">
+                  <TableCell className="overflow-hidden pe-0">
                     {companyEditId === contact.id ? (
                       <Input
                         autoFocus
