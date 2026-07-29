@@ -188,17 +188,17 @@ export default function ContactsPage() {
       </div>
 
       <div className="rounded-lg border bg-background">
-        <Table className="table-fixed">
+        <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-24 whitespace-normal">שם</TableHead>
-              <TableHead className="w-20 whitespace-normal">חדש/קיים</TableHead>
-              <TableHead className="w-24 whitespace-normal">טלפון</TableHead>
-              <TableHead className="whitespace-normal">משימה קרובה</TableHead>
-              <TableHead className="w-24 whitespace-normal ps-0">תאריך שינוי משימה</TableHead>
-              <TableHead className="w-24 whitespace-normal">שם העסק</TableHead>
-              <TableHead className="w-28 whitespace-normal">סטטוס</TableHead>
-              <TableHead className="w-24 whitespace-normal">פעולות</TableHead>
+              <TableHead>שם</TableHead>
+              <TableHead>חדש/קיים</TableHead>
+              <TableHead>טלפון</TableHead>
+              <TableHead>משימה קרובה</TableHead>
+              <TableHead>תאריך שינוי משימה</TableHead>
+              <TableHead>שם העסק</TableHead>
+              <TableHead>סטטוס</TableHead>
+              <TableHead>פעולות</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -227,14 +227,14 @@ export default function ContactsPage() {
                       : ""
                   }
                 >
-                  <TableCell className="whitespace-normal overflow-hidden">
+                  <TableCell>
                     <a
                       href={`/contacts/${contact.id}`}
                       className="font-medium text-primary hover:underline"
                     >
                       {contact.name}
                     </a>
-                    <div className="truncate text-xs text-muted-foreground">
+                    <div className="text-xs text-muted-foreground">
                       {formatJoinDate(contact.createdAt)}
                     </div>
                   </TableCell>
@@ -254,10 +254,10 @@ export default function ContactsPage() {
                       </Badge>
                     </button>
                   </TableCell>
-                  <TableCell className="whitespace-normal overflow-hidden">
+                  <TableCell>
                     {contact.phone ? (
-                      <div className="flex min-w-0 items-center gap-1">
-                        <span className="truncate">{contact.phone}</span>
+                      <div className="flex items-center gap-2">
+                        <span>{contact.phone}</span>
                         <a
                           href={`https://wa.me/${toWhatsAppNumber(contact.phone)}`}
                           target="_blank"
@@ -271,13 +271,11 @@ export default function ContactsPage() {
                       <span className="text-muted-foreground">—</span>
                     )}
                   </TableCell>
-                  <TableCell className="whitespace-normal overflow-hidden">
-                    <div className="flex min-w-0 items-center gap-1">
+                  <TableCell>
+                    <div className="flex items-center gap-2">
                       {nextTask ? (
                         <>
-                          <span className="min-w-0 flex-1 truncate text-sm" title={nextTask.title}>
-                            {nextTask.title}
-                          </span>
+                          <span className="text-sm">{nextTask.title}</span>
                           <button
                             onClick={() => completeTask(nextTask.id)}
                             title="סמן כהושלם"
@@ -325,7 +323,7 @@ export default function ContactsPage() {
                       </div>
                     )}
                   </TableCell>
-                  <TableCell className="whitespace-normal overflow-hidden ps-0">
+                  <TableCell>
                     {nextTask && (
                       <div className="text-xs font-semibold text-foreground">
                         <div>
@@ -337,7 +335,7 @@ export default function ContactsPage() {
                       </div>
                     )}
                   </TableCell>
-                  <TableCell className="overflow-hidden pe-0">
+                  <TableCell>
                     {companyEditId === contact.id ? (
                       <Input
                         autoFocus
@@ -348,7 +346,7 @@ export default function ContactsPage() {
                           if (e.key === "Enter") saveCompany(contact.id);
                           if (e.key === "Escape") setCompanyEditId(null);
                         }}
-                        className="h-6 w-full text-xs"
+                        className="h-6 w-40 text-xs"
                       />
                     ) : (
                       <button
@@ -358,21 +356,18 @@ export default function ContactsPage() {
                         }}
                         title="לחיצה לעריכת שם העסק"
                       >
-                        <Badge
-                          variant="outline"
-                          className="max-w-full truncate text-xs text-muted-foreground"
-                        >
+                        <Badge variant="outline" className="text-xs text-muted-foreground">
                           🏢 {contact.company || "הוסף עסק"}
                         </Badge>
                       </button>
                     )}
                   </TableCell>
-                  <TableCell className="ps-0">
+                  <TableCell>
                     <Select
                       value={contact.status}
                       onValueChange={(v) => updateStatus(contact.id, v || contact.status)}
                     >
-                      <SelectTrigger className="w-full">
+                      <SelectTrigger className="w-36">
                         <SelectValue>
                           <Badge className={STATUS_COLORS[contact.status] ?? ""}>
                             {contact.status}
@@ -389,13 +384,12 @@ export default function ContactsPage() {
                     </Select>
                   </TableCell>
                   <TableCell>
-                    <div className="flex flex-wrap items-center gap-1">
+                    <div className="flex items-center gap-1">
                       <FollowUpMenu
                         contactId={contact.id}
                         name={contact.name}
                         phone={contact.phone ?? ""}
                         onSent={load}
-                        pill
                       />
                       <Button
                         variant="ghost"
