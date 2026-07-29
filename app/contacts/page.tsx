@@ -218,7 +218,10 @@ export default function ContactsPage() {
             {contacts.map((contact) => {
               const nextTask = contact.tasks[0];
               return (
-                <TableRow key={contact.id}>
+                <TableRow
+                  key={contact.id}
+                  className={contact.status === "✅ סגור" ? "bg-green-50" : ""}
+                >
                   <TableCell>
                     <a
                       href={`/contacts/${contact.id}`}
@@ -306,7 +309,7 @@ export default function ContactsPage() {
                         📅
                       </button>
                       {nextTask && (
-                        <span className="text-xs text-muted-foreground">
+                        <span className="text-xs font-semibold text-foreground">
                           {formatDateTime(nextTask.updatedAt)}
                         </span>
                       )}
