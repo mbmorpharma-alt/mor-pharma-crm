@@ -195,7 +195,7 @@ export default function ContactsPage() {
               <TableHead>חדש/קיים</TableHead>
               <TableHead>טלפון</TableHead>
               <TableHead>משימה קרובה</TableHead>
-              <TableHead>תאריך שינוי משימה</TableHead>
+              <TableHead className="ps-0">תאריך שינוי משימה</TableHead>
               <TableHead>שם העסק</TableHead>
               <TableHead>סטטוס</TableHead>
               <TableHead>פעולות</TableHead>
@@ -323,7 +323,7 @@ export default function ContactsPage() {
                       </div>
                     )}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="ps-0">
                     {nextTask && (
                       <div className="text-xs font-semibold text-foreground">
                         <div>
