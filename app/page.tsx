@@ -25,6 +25,8 @@ type Deal = {
   title: string;
   value: number | null;
   stage: string;
+  createdAt: string;
+  contact: { id: number; name: string } | null;
 };
 
 export default function DashboardPage() {
@@ -61,6 +63,11 @@ export default function DashboardPage() {
     (d) => d.stage !== "סגור-נוצח" && d.stage !== "סגור-הפסד"
   );
   const dealsValue = openDeals.reduce((sum, d) => sum + (d.value ?? 0), 0);
+  const wonDeals = deals.filter((d) => d.stage === "סגור-נוצח");
+  const revenue = wonDeals.reduce((sum, d) => sum + (d.value ?? 0), 0);
+  const recentSales = [...wonDeals]
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 5);
   const recentContacts = [...contacts]
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, 5);
@@ -71,13 +78,14 @@ export default function DashboardPage() {
     { label: "משימות באיחור", value: overdueTasks.length, highlight: overdueTasks.length > 0 },
     { label: "עסקאות פתוחות", value: openDeals.length },
     { label: "שווי עסקאות פתוחות", value: `₪${dealsValue.toLocaleString()}` },
+    { label: "💰 הכנסות מעסקאות סגורות", value: `₪${revenue.toLocaleString()}` },
   ];
 
   return (
     <div dir="rtl" className="mx-auto max-w-6xl p-4 flex flex-col gap-6">
       <h1 className="text-2xl font-bold">דשבורד</h1>
 
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
         {statCards.map((stat) => (
           <Card key={stat.label}>
             <CardContent className="p-4">
@@ -94,7 +102,30 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <Card>
+          <CardHeader>
+            <CardTitle>💰 מכירות אחרונות</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-2">
+            {recentSales.length === 0 && (
+              <p className="text-sm text-muted-foreground">אין מכירות סגורות עדיין</p>
+            )}
+            {recentSales.map((d) => (
+              <a
+                key={d.id}
+                href={d.contact ? `/contacts/${d.contact.id}` : "/deals"}
+                className="flex items-center justify-between rounded-md border p-2 text-sm hover:bg-muted"
+              >
+                <span>{d.contact?.name ?? d.title}</span>
+                <span className="font-semibold text-green-700">
+                  ₪{(d.value ?? 0).toLocaleString()}
+                </span>
+              </a>
+            ))}
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle>אנשי קשר אחרונים</CardTitle>

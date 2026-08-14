@@ -24,6 +24,9 @@ import { toWhatsAppNumber } from "@/lib/whatsapp";
 import { ContactFormDialog, ContactFormValues } from "@/components/contact-form-dialog";
 import { FollowUpMenu } from "@/components/follow-up-menu";
 import { TaskFormDialog, TaskFormValues } from "@/components/task-form-dialog";
+import { CloseDealDialog } from "@/components/close-deal-dialog";
+
+const CLOSED_STATUS = "✅ סגור";
 
 function toDatetimeLocal(iso: string | null) {
   if (!iso) return "";
@@ -75,6 +78,7 @@ export default function ContactsPage() {
   const [taskForContact, setTaskForContact] = useState<TaskFormValues | null>(null);
   const [companyEditId, setCompanyEditId] = useState<number | null>(null);
   const [companyDraft, setCompanyDraft] = useState("");
+  const [closeDealContact, setCloseDealContact] = useState<{ id: number; name: string } | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -131,6 +135,22 @@ export default function ContactsPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ...current, company }),
     });
+  }
+
+  async function confirmCloseDeal(amount: number) {
+    if (!closeDealContact) return;
+    await updateStatus(closeDealContact.id, CLOSED_STATUS);
+    await fetch("/api/deals", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: `מכירה - ${closeDealContact.name}`,
+        value: amount,
+        stage: "סגור-נוצח",
+        contactId: closeDealContact.id,
+      }),
+    });
+    setCloseDealContact(null);
   }
 
   async function completeTask(taskId: number) {
@@ -365,7 +385,14 @@ export default function ContactsPage() {
                   <TableCell>
                     <Select
                       value={contact.status}
-                      onValueChange={(v) => updateStatus(contact.id, v || contact.status)}
+                      onValueChange={(v) => {
+                        if (!v) return;
+                        if (v === CLOSED_STATUS) {
+                          setCloseDealContact({ id: contact.id, name: contact.name });
+                        } else {
+                          updateStatus(contact.id, v);
+                        }
+                      }}
                     >
                       <SelectTrigger className="w-36">
                         <SelectValue>
@@ -439,6 +466,15 @@ export default function ContactsPage() {
         onOpenChange={setTaskDialogOpen}
         initial={taskForContact}
         onSaved={load}
+      />
+
+      <CloseDealDialog
+        open={closeDealContact !== null}
+        onOpenChange={(open) => {
+          if (!open) setCloseDealContact(null);
+        }}
+        contactName={closeDealContact?.name ?? ""}
+        onConfirm={confirmCloseDeal}
       />
     </div>
   );
