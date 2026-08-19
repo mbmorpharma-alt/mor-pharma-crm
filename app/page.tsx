@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { MonthPicker } from "@/components/month-picker";
 
 type Contact = {
   id: number;
@@ -33,6 +34,9 @@ export default function DashboardPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
+  const today = new Date();
+  const [periodYear, setPeriodYear] = useState(today.getFullYear());
+  const [periodMonth, setPeriodMonth] = useState(today.getMonth());
 
   useEffect(() => {
     async function load() {
@@ -63,15 +67,23 @@ export default function DashboardPage() {
   );
   const dealsValue = openDeals.reduce((sum, d) => sum + (d.value ?? 0), 0);
   const wonDeals = deals.filter((d) => d.stage === "סגור-נוצח");
-  const revenueExisting = wonDeals
+  const periodStart = new Date(periodYear, periodMonth, 1);
+  const periodEnd = new Date(periodYear, periodMonth + 1, 1);
+  const periodWonDeals = wonDeals.filter((d) => {
+    const createdAt = new Date(d.createdAt);
+    return createdAt >= periodStart && createdAt < periodEnd;
+  });
+  const revenueExisting = periodWonDeals
     .filter((d) => d.wasExistingCustomer === true)
     .reduce((sum, d) => sum + (d.value ?? 0), 0);
-  const revenueNew = wonDeals
+  const revenueNew = periodWonDeals
     .filter((d) => d.wasExistingCustomer === false)
     .reduce((sum, d) => sum + (d.value ?? 0), 0);
-  const recentSales = [...wonDeals]
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .slice(0, 5);
+  const periodRevenue = revenueExisting + revenueNew;
+  const recentSales = [...periodWonDeals].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+  const periodLabel = `${String(periodMonth + 1).padStart(2, "0")}/${periodYear}`;
 
   const statCards = [
     { label: "אנשי קשר", value: contacts.length },
@@ -79,15 +91,26 @@ export default function DashboardPage() {
     { label: "משימות באיחור", value: overdueTasks.length, highlight: overdueTasks.length > 0 },
     { label: "עסקאות פתוחות", value: openDeals.length },
     { label: "שווי עסקאות פתוחות", value: `₪${dealsValue.toLocaleString()}` },
-    { label: "💰 הכנסות מלקוחות קיימים", value: `₪${revenueExisting.toLocaleString()}` },
-    { label: "💰 הכנסות מלקוחות חדשים", value: `₪${revenueNew.toLocaleString()}` },
+    { label: `💰 סה"כ הכנסות ב-${periodLabel}`, value: `₪${periodRevenue.toLocaleString()}` },
+    { label: `💰 קיימים ב-${periodLabel}`, value: `₪${revenueExisting.toLocaleString()}` },
+    { label: `💰 חדשים ב-${periodLabel}`, value: `₪${revenueNew.toLocaleString()}` },
   ];
 
   return (
     <div dir="rtl" className="mx-auto max-w-6xl p-4 flex flex-col gap-6">
-      <h1 className="text-2xl font-bold">דשבורד</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">דשבורד</h1>
+        <MonthPicker
+          year={periodYear}
+          month={periodMonth}
+          onChange={(y, m) => {
+            setPeriodYear(y);
+            setPeriodMonth(m);
+          }}
+        />
+      </div>
 
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-7">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-8">
         {statCards.map((stat) => (
           <Card key={stat.label}>
             <CardContent className="p-4">
@@ -107,11 +130,11 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 gap-4">
         <Card>
           <CardHeader>
-            <CardTitle>💰 מכירות אחרונות</CardTitle>
+            <CardTitle>💰 מכירות ב-{periodLabel}</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-2">
             {recentSales.length === 0 && (
-              <p className="text-sm text-muted-foreground">אין מכירות סגורות עדיין</p>
+              <p className="text-sm text-muted-foreground">אין מכירות סגורות בתקופה הזו</p>
             )}
             {recentSales.map((d) => (
               <a
