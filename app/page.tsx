@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { STATUS_COLORS } from "@/lib/statuses";
 
 type Contact = {
   id: number;
@@ -74,9 +72,6 @@ export default function DashboardPage() {
   const recentSales = [...wonDeals]
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, 5);
-  const recentContacts = [...contacts]
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .slice(0, 5);
 
   const statCards = [
     { label: "אנשי קשר", value: contacts.length },
@@ -109,7 +104,7 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4">
         <Card>
           <CardHeader>
             <CardTitle>💰 מכירות אחרונות</CardTitle>
@@ -128,48 +123,6 @@ export default function DashboardPage() {
                 <span className="font-semibold text-green-700">
                   ₪{(d.value ?? 0).toLocaleString()}
                 </span>
-              </a>
-            ))}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>אנשי קשר אחרונים</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-2">
-            {recentContacts.length === 0 && (
-              <p className="text-sm text-muted-foreground">אין אנשי קשר עדיין</p>
-            )}
-            {recentContacts.map((c) => (
-              <a
-                key={c.id}
-                href={`/contacts/${c.id}`}
-                className="flex items-center justify-between rounded-md border p-2 text-sm hover:bg-muted"
-              >
-                <span>{c.name}</span>
-                <Badge className={STATUS_COLORS[c.status] ?? ""}>{c.status}</Badge>
-              </a>
-            ))}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>משימות באיחור</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-2">
-            {overdueTasks.length === 0 && (
-              <p className="text-sm text-muted-foreground">אין משימות באיחור 🎉</p>
-            )}
-            {overdueTasks.map((t) => (
-              <a
-                key={t.id}
-                href="/tasks"
-                className="flex items-center justify-between rounded-md border p-2 text-sm hover:bg-muted"
-              >
-                <span>{t.title}</span>
-                {t.contact && <span className="text-muted-foreground">{t.contact.name}</span>}
               </a>
             ))}
           </CardContent>
