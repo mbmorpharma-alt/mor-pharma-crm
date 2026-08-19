@@ -27,6 +27,7 @@ type Deal = {
   stage: string;
   createdAt: string;
   contact: { id: number; name: string } | null;
+  wasExistingCustomer: boolean | null;
 };
 
 export default function DashboardPage() {
@@ -64,7 +65,12 @@ export default function DashboardPage() {
   );
   const dealsValue = openDeals.reduce((sum, d) => sum + (d.value ?? 0), 0);
   const wonDeals = deals.filter((d) => d.stage === "סגור-נוצח");
-  const revenue = wonDeals.reduce((sum, d) => sum + (d.value ?? 0), 0);
+  const revenueExisting = wonDeals
+    .filter((d) => d.wasExistingCustomer === true)
+    .reduce((sum, d) => sum + (d.value ?? 0), 0);
+  const revenueNew = wonDeals
+    .filter((d) => d.wasExistingCustomer === false)
+    .reduce((sum, d) => sum + (d.value ?? 0), 0);
   const recentSales = [...wonDeals]
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, 5);
@@ -78,14 +84,15 @@ export default function DashboardPage() {
     { label: "משימות באיחור", value: overdueTasks.length, highlight: overdueTasks.length > 0 },
     { label: "עסקאות פתוחות", value: openDeals.length },
     { label: "שווי עסקאות פתוחות", value: `₪${dealsValue.toLocaleString()}` },
-    { label: "💰 הכנסות מעסקאות סגורות", value: `₪${revenue.toLocaleString()}` },
+    { label: "💰 הכנסות מלקוחות קיימים", value: `₪${revenueExisting.toLocaleString()}` },
+    { label: "💰 הכנסות מלקוחות חדשים", value: `₪${revenueNew.toLocaleString()}` },
   ];
 
   return (
     <div dir="rtl" className="mx-auto max-w-6xl p-4 flex flex-col gap-6">
       <h1 className="text-2xl font-bold">דשבורד</h1>
 
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-7">
         {statCards.map((stat) => (
           <Card key={stat.label}>
             <CardContent className="p-4">

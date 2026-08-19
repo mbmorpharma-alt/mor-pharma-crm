@@ -78,7 +78,11 @@ export default function ContactsPage() {
   const [taskForContact, setTaskForContact] = useState<TaskFormValues | null>(null);
   const [companyEditId, setCompanyEditId] = useState<number | null>(null);
   const [companyDraft, setCompanyDraft] = useState("");
-  const [closeDealContact, setCloseDealContact] = useState<{ id: number; name: string } | null>(null);
+  const [closeDealContact, setCloseDealContact] = useState<{
+    id: number;
+    name: string;
+    isExistingCustomer: boolean;
+  } | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -148,6 +152,7 @@ export default function ContactsPage() {
         value: amount,
         stage: "סגור-נוצח",
         contactId: closeDealContact.id,
+        wasExistingCustomer: closeDealContact.isExistingCustomer,
       }),
     });
     setCloseDealContact(null);
@@ -388,7 +393,11 @@ export default function ContactsPage() {
                       onValueChange={(v) => {
                         if (!v) return;
                         if (v === CLOSED_STATUS) {
-                          setCloseDealContact({ id: contact.id, name: contact.name });
+                          setCloseDealContact({
+                            id: contact.id,
+                            name: contact.name,
+                            isExistingCustomer: contact.isExistingCustomer,
+                          });
                         } else {
                           updateStatus(contact.id, v);
                         }

@@ -22,6 +22,8 @@ export async function POST(request: NextRequest) {
       stage: body.stage || "ליד",
       notes: body.notes || null,
       contactId: body.contactId ? Number(body.contactId) : null,
+      wasExistingCustomer:
+        typeof body.wasExistingCustomer === "boolean" ? body.wasExistingCustomer : null,
     },
   });
 
