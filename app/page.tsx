@@ -83,17 +83,25 @@ export default function DashboardPage() {
   const recentSales = [...periodWonDeals].sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
+  const periodLeads = contacts.filter((c) => {
+    const createdAt = new Date(c.createdAt);
+    return createdAt >= periodStart && createdAt < periodEnd;
+  });
   const periodLabel = `${String(periodMonth + 1).padStart(2, "0")}/${periodYear}`;
 
-  const statCards = [
+  const liveStatCards = [
     { label: "אנשי קשר", value: contacts.length },
     { label: "משימות ממתינות", value: pendingTasks.length },
     { label: "משימות באיחור", value: overdueTasks.length, highlight: overdueTasks.length > 0 },
     { label: "עסקאות פתוחות", value: openDeals.length },
     { label: "שווי עסקאות פתוחות", value: `₪${dealsValue.toLocaleString()}` },
-    { label: `💰 סה"כ הכנסות ב-${periodLabel}`, value: `₪${periodRevenue.toLocaleString()}` },
-    { label: `💰 קיימים ב-${periodLabel}`, value: `₪${revenueExisting.toLocaleString()}` },
-    { label: `💰 חדשים ב-${periodLabel}`, value: `₪${revenueNew.toLocaleString()}` },
+  ];
+
+  const periodStatCards = [
+    { label: "👥 לידים חדשים", value: periodLeads.length },
+    { label: '💰 סה"כ הכנסות', value: `₪${periodRevenue.toLocaleString()}` },
+    { label: "💰 מלקוחות קיימים", value: `₪${revenueExisting.toLocaleString()}` },
+    { label: "💰 מלקוחות חדשים", value: `₪${revenueNew.toLocaleString()}` },
   ];
 
   return (
@@ -110,8 +118,8 @@ export default function DashboardPage() {
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-8">
-        {statCards.map((stat) => (
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
+        {liveStatCards.map((stat) => (
           <Card key={stat.label}>
             <CardContent className="p-4">
               <p className="text-sm text-muted-foreground">{stat.label}</p>
@@ -125,6 +133,20 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         ))}
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <h2 className="text-sm font-semibold text-muted-foreground">נתוני {periodLabel}</h2>
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+          {periodStatCards.map((stat) => (
+            <Card key={stat.label}>
+              <CardContent className="p-4">
+                <p className="text-sm text-muted-foreground">{stat.label}</p>
+                <p className="mt-1 text-2xl font-bold">{stat.value}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4">
