@@ -164,7 +164,28 @@ export default function DashboardPage() {
                 href={d.contact ? `/contacts/${d.contact.id}` : "/deals"}
                 className="flex items-center justify-between rounded-md border p-2 text-sm hover:bg-muted"
               >
-                <span>{d.contact?.name ?? d.title}</span>
+                <div className="flex flex-col gap-0.5">
+                  <span>{d.contact?.name ?? d.title}</span>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <span>
+                      {new Date(d.createdAt).toLocaleDateString("he-IL", {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      })}
+                    </span>
+                    {d.wasExistingCustomer === true && (
+                      <span className="rounded-full bg-red-100 px-2 py-0.5 text-red-800">
+                        🔁 קיים
+                      </span>
+                    )}
+                    {d.wasExistingCustomer === false && (
+                      <span className="rounded-full bg-blue-100 px-2 py-0.5 text-blue-800">
+                        🆕 חדש
+                      </span>
+                    )}
+                  </div>
+                </div>
                 <span className="font-semibold text-green-700">
                   ₪{(d.value ?? 0).toLocaleString()}
                 </span>
