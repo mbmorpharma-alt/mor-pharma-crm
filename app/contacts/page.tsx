@@ -283,6 +283,9 @@ export default function ContactsPage() {
                     {contact.phone ? (
                       <div className="flex items-center gap-2">
                         <span>{contact.phone}</span>
+                        <a href={`tel:+${toWhatsAppNumber(contact.phone)}`} title="התקשר">
+                          📞
+                        </a>
                         <a
                           href={`https://wa.me/${toWhatsAppNumber(contact.phone)}`}
                           target="_blank"
