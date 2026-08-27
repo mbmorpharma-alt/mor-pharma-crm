@@ -173,6 +173,11 @@ export default function DashboardPage() {
                         month: "long",
                         year: "numeric",
                       })}
+                      {", "}
+                      {new Date(d.createdAt).toLocaleTimeString("he-IL", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
                     </span>
                     {d.wasExistingCustomer === true && (
                       <span className="rounded-full bg-red-100 px-2 py-0.5 text-red-800">
