@@ -184,9 +184,7 @@ export default function ContactProfilePage({
             <span className="text-muted-foreground">טלפון: </span>
             {contact.phone ? (
               <a
-                href={`https://wa.me/${toWhatsAppNumber(contact.phone)}`}
-                target="_blank"
-                rel="noopener noreferrer"
+                href={`whatsapp://send?phone=${toWhatsAppNumber(contact.phone)}`}
                 className="text-primary hover:underline"
               >
                 {contact.phone} 💬

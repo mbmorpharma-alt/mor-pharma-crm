@@ -151,9 +151,7 @@ export default function TasksPage() {
             <div className="flex items-center gap-2">
               <span>{task.contact.phone}</span>
               <a
-                href={`https://wa.me/${toWhatsAppNumber(task.contact.phone)}`}
-                target="_blank"
-                rel="noopener noreferrer"
+                href={`whatsapp://send?phone=${toWhatsAppNumber(task.contact.phone)}`}
                 title="פתח וואטסאפ"
               >
                 💬

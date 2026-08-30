@@ -287,9 +287,7 @@ export default function ContactsPage() {
                           📞
                         </a>
                         <a
-                          href={`https://wa.me/${toWhatsAppNumber(contact.phone)}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                          href={`whatsapp://send?phone=${toWhatsAppNumber(contact.phone)}`}
                           title="פתח וואטסאפ"
                         >
                           💬
