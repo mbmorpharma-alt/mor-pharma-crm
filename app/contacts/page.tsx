@@ -25,7 +25,8 @@ import { ContactFormDialog, ContactFormValues } from "@/components/contact-form-
 import { FollowUpMenu } from "@/components/follow-up-menu";
 import { TaskFormDialog, TaskFormValues } from "@/components/task-form-dialog";
 import { CloseDealDialog } from "@/components/close-deal-dialog";
-import { usePrivacyMode, maskPhone } from "@/lib/use-privacy-mode";
+import { usePrivacyMode, maskPhone, BLUR_NAME_CLASS } from "@/lib/use-privacy-mode";
+import { cn } from "@/lib/utils";
 
 const CLOSED_STATUS = "✅ סגור";
 
@@ -257,7 +258,10 @@ export default function ContactsPage() {
                   <TableCell>
                     <a
                       href={`/contacts/${contact.id}`}
-                      className="font-medium text-primary hover:underline"
+                      className={cn(
+                        "font-medium text-primary hover:underline",
+                        hidePhones && BLUR_NAME_CLASS
+                      )}
                     >
                       {contact.name}
                     </a>

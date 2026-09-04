@@ -37,3 +37,5 @@ export function maskPhone(phone: string) {
 export function formatMoney(value: number, hidden: boolean) {
   return hidden ? "₪ ••••" : `₪${value.toLocaleString()}`;
 }
+
+export const BLUR_NAME_CLASS = "blur-sm select-none";

@@ -11,7 +11,8 @@ import { FollowUpMenu } from "@/components/follow-up-menu";
 import { TaskFormDialog, TaskFormValues } from "@/components/task-form-dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { usePrivacyMode, maskPhone, formatMoney } from "@/lib/use-privacy-mode";
+import { usePrivacyMode, maskPhone, formatMoney, BLUR_NAME_CLASS } from "@/lib/use-privacy-mode";
+import { cn } from "@/lib/utils";
 
 function toDatetimeLocal(iso: string | null) {
   if (!iso) return "";
@@ -145,7 +146,9 @@ export default function ContactProfilePage({
     <div dir="rtl" className="mx-auto max-w-4xl p-4 flex flex-col gap-4">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold">{contact.name}</h1>
+          <h1 className={cn("text-2xl font-bold", hidden && BLUR_NAME_CLASS)}>
+            {contact.name}
+          </h1>
           {contact.company && (
             <p className="text-muted-foreground">{contact.company}</p>
           )}
@@ -225,7 +228,7 @@ export default function ContactProfilePage({
               key={deal.id}
               className="flex items-center justify-between rounded-md border p-2 text-sm"
             >
-              <span>{deal.title}</span>
+              <span className={cn(hidden && BLUR_NAME_CLASS)}>{deal.title}</span>
               <div className="flex items-center gap-2">
                 {deal.value != null && <span>{formatMoney(deal.value, hidden)}</span>}
                 <Badge variant="secondary">{deal.stage}</Badge>

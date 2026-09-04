@@ -15,7 +15,8 @@ import {
 import { TaskFormDialog, TaskFormValues } from "@/components/task-form-dialog";
 import { FollowUpMenu } from "@/components/follow-up-menu";
 import { toWhatsAppNumber } from "@/lib/whatsapp";
-import { usePrivacyMode, maskPhone } from "@/lib/use-privacy-mode";
+import { usePrivacyMode, maskPhone, BLUR_NAME_CLASS } from "@/lib/use-privacy-mode";
+import { cn } from "@/lib/utils";
 
 type Task = {
   id: number;
@@ -138,9 +139,11 @@ export default function TasksPage() {
           {task.contact ? (
             <a
               href={`/contacts/${task.contact.id}`}
-              className={`hover:underline ${
-                contactPillColor(task.contact.id).match(/text-\S+/)?.[0] ?? ""
-              }`}
+              className={cn(
+                "hover:underline",
+                contactPillColor(task.contact.id).match(/text-\S+/)?.[0] ?? "",
+                hidden && BLUR_NAME_CLASS
+              )}
             >
               {task.contact.name}
             </a>

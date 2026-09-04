@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DEAL_STAGES } from "@/lib/deal-stages";
 import { DealFormDialog, DealFormValues } from "@/components/deal-form-dialog";
-import { usePrivacyMode, formatMoney } from "@/lib/use-privacy-mode";
+import { usePrivacyMode, formatMoney, BLUR_NAME_CLASS } from "@/lib/use-privacy-mode";
+import { cn } from "@/lib/utils";
 
 type Deal = {
   id: number;
@@ -89,7 +90,9 @@ export default function DealsPage() {
                       onClick={() => openEdit(deal)}
                     >
                       <CardHeader className="pb-2">
-                        <CardTitle className="text-sm">{deal.title}</CardTitle>
+                        <CardTitle className={cn("text-sm", hidden && BLUR_NAME_CLASS)}>
+                          {deal.title}
+                        </CardTitle>
                       </CardHeader>
                       <CardContent className="flex flex-col gap-1 text-xs text-muted-foreground">
                         {deal.value != null && <span>{formatMoney(deal.value, hidden)}</span>}
@@ -97,7 +100,10 @@ export default function DealsPage() {
                           <a
                             href={`/contacts/${deal.contact.id}`}
                             onClick={(e) => e.stopPropagation()}
-                            className="text-primary hover:underline"
+                            className={cn(
+                              "text-primary hover:underline",
+                              hidden && BLUR_NAME_CLASS
+                            )}
                           >
                             {deal.contact.name}
                           </a>

@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MonthPicker } from "@/components/month-picker";
-import { usePrivacyMode, formatMoney } from "@/lib/use-privacy-mode";
+import { usePrivacyMode, formatMoney, BLUR_NAME_CLASS } from "@/lib/use-privacy-mode";
+import { cn } from "@/lib/utils";
 
 type Contact = {
   id: number;
@@ -167,7 +168,9 @@ export default function DashboardPage() {
                 className="flex items-center justify-between rounded-md border p-2 text-sm hover:bg-muted"
               >
                 <div className="flex flex-col gap-0.5">
-                  <span>{d.contact?.name ?? d.title}</span>
+                  <span className={cn(hidden && BLUR_NAME_CLASS)}>
+                    {d.contact?.name ?? d.title}
+                  </span>
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <span>
                       {new Date(d.createdAt).toLocaleDateString("he-IL", {
