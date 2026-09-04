@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MonthPicker } from "@/components/month-picker";
+import { usePrivacyMode, formatMoney } from "@/lib/use-privacy-mode";
 
 type Contact = {
   id: number;
@@ -30,6 +31,7 @@ type Deal = {
 };
 
 export default function DashboardPage() {
+  const { hidden } = usePrivacyMode();
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [deals, setDeals] = useState<Deal[]>([]);
@@ -94,14 +96,14 @@ export default function DashboardPage() {
     { label: "משימות ממתינות", value: pendingTasks.length },
     { label: "משימות באיחור", value: overdueTasks.length, highlight: overdueTasks.length > 0 },
     { label: "עסקאות פתוחות", value: openDeals.length },
-    { label: "שווי עסקאות פתוחות", value: `₪${dealsValue.toLocaleString()}` },
+    { label: "שווי עסקאות פתוחות", value: formatMoney(dealsValue, hidden) },
   ];
 
   const periodStatCards = [
     { label: "👥 לידים חדשים", value: periodLeads.length },
-    { label: '💰 סה"כ הכנסות', value: `₪${periodRevenue.toLocaleString()}` },
-    { label: "💰 מלקוחות קיימים", value: `₪${revenueExisting.toLocaleString()}` },
-    { label: "💰 מלקוחות חדשים", value: `₪${revenueNew.toLocaleString()}` },
+    { label: '💰 סה"כ הכנסות', value: formatMoney(periodRevenue, hidden) },
+    { label: "💰 מלקוחות קיימים", value: formatMoney(revenueExisting, hidden) },
+    { label: "💰 מלקוחות חדשים", value: formatMoney(revenueNew, hidden) },
   ];
 
   return (
@@ -192,7 +194,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
                 <span className="font-semibold text-green-700">
-                  ₪{(d.value ?? 0).toLocaleString()}
+                  {formatMoney(d.value ?? 0, hidden)}
                 </span>
               </a>
             ))}

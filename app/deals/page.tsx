@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DEAL_STAGES } from "@/lib/deal-stages";
 import { DealFormDialog, DealFormValues } from "@/components/deal-form-dialog";
+import { usePrivacyMode, formatMoney } from "@/lib/use-privacy-mode";
 
 type Deal = {
   id: number;
@@ -16,6 +17,7 @@ type Deal = {
 };
 
 export default function DealsPage() {
+  const { hidden } = usePrivacyMode();
   const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -76,7 +78,7 @@ export default function DealsPage() {
                 <div className="flex items-center justify-between px-1">
                   <span className="text-sm font-semibold">{stage}</span>
                   <span className="text-xs text-muted-foreground">
-                    {stageDeals.length} · ₪{total.toLocaleString()}
+                    {stageDeals.length} · {formatMoney(total, hidden)}
                   </span>
                 </div>
                 <div className="flex flex-col gap-2">
@@ -90,7 +92,7 @@ export default function DealsPage() {
                         <CardTitle className="text-sm">{deal.title}</CardTitle>
                       </CardHeader>
                       <CardContent className="flex flex-col gap-1 text-xs text-muted-foreground">
-                        {deal.value != null && <span>₪{deal.value.toLocaleString()}</span>}
+                        {deal.value != null && <span>{formatMoney(deal.value, hidden)}</span>}
                         {deal.contact && (
                           <a
                             href={`/contacts/${deal.contact.id}`}

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { usePrivacyMode } from "@/lib/use-privacy-mode";
 
 const links = [
   { href: "/", label: "דשבורד" },
@@ -16,6 +17,7 @@ const links = [
 export function Nav() {
   const pathname = usePathname();
   const router = useRouter();
+  const { hidden, toggle } = usePrivacyMode();
 
   if (pathname === "/login") return null;
 
@@ -50,9 +52,14 @@ export function Nav() {
               </Link>
             ))}
           </nav>
-          <Button variant="outline" size="sm" onClick={handleLogout}>
-            התנתקות
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={toggle}>
+              {hidden ? "👁️ הצג נתונים" : "🙈 הסתר נתונים"}
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleLogout}>
+              התנתקות
+            </Button>
+          </div>
         </div>
       </div>
     </header>

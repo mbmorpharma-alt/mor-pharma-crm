@@ -25,6 +25,7 @@ import { ContactFormDialog, ContactFormValues } from "@/components/contact-form-
 import { FollowUpMenu } from "@/components/follow-up-menu";
 import { TaskFormDialog, TaskFormValues } from "@/components/task-form-dialog";
 import { CloseDealDialog } from "@/components/close-deal-dialog";
+import { usePrivacyMode, maskPhone } from "@/lib/use-privacy-mode";
 
 const CLOSED_STATUS = "✅ סגור";
 
@@ -83,6 +84,7 @@ export default function ContactsPage() {
     name: string;
     isExistingCustomer: boolean;
   } | null>(null);
+  const { hidden: hidePhones } = usePrivacyMode();
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -282,7 +284,7 @@ export default function ContactsPage() {
                   <TableCell>
                     {contact.phone ? (
                       <div className="flex items-center gap-2">
-                        <span>{contact.phone}</span>
+                        <span>{hidePhones ? maskPhone(contact.phone) : contact.phone}</span>
                         <a href={`tel:+${toWhatsAppNumber(contact.phone)}`} title="התקשר">
                           📞
                         </a>

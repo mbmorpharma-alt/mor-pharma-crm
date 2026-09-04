@@ -15,6 +15,7 @@ import {
 import { TaskFormDialog, TaskFormValues } from "@/components/task-form-dialog";
 import { FollowUpMenu } from "@/components/follow-up-menu";
 import { toWhatsAppNumber } from "@/lib/whatsapp";
+import { usePrivacyMode, maskPhone } from "@/lib/use-privacy-mode";
 
 type Task = {
   id: number;
@@ -79,6 +80,7 @@ function contactPillColor(id: number) {
 }
 
 export default function TasksPage() {
+  const { hidden } = usePrivacyMode();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -149,7 +151,7 @@ export default function TasksPage() {
         <TableCell>
           {task.contact?.phone ? (
             <div className="flex items-center gap-2">
-              <span>{task.contact.phone}</span>
+              <span>{hidden ? maskPhone(task.contact.phone) : task.contact.phone}</span>
               <a
                 href={`whatsapp://send?phone=${toWhatsAppNumber(task.contact.phone)}`}
                 title="פתח וואטסאפ"

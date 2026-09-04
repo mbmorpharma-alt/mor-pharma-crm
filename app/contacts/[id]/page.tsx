@@ -11,6 +11,7 @@ import { FollowUpMenu } from "@/components/follow-up-menu";
 import { TaskFormDialog, TaskFormValues } from "@/components/task-form-dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { usePrivacyMode, maskPhone, formatMoney } from "@/lib/use-privacy-mode";
 
 function toDatetimeLocal(iso: string | null) {
   if (!iso) return "";
@@ -64,6 +65,7 @@ export default function ContactProfilePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
+  const { hidden } = usePrivacyMode();
   const [contact, setContact] = useState<ContactDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -187,7 +189,7 @@ export default function ContactProfilePage({
                 href={`whatsapp://send?phone=${toWhatsAppNumber(contact.phone)}`}
                 className="text-primary hover:underline"
               >
-                {contact.phone} 💬
+                {hidden ? maskPhone(contact.phone) : contact.phone} 💬
               </a>
             ) : (
               "—"
@@ -225,7 +227,7 @@ export default function ContactProfilePage({
             >
               <span>{deal.title}</span>
               <div className="flex items-center gap-2">
-                {deal.value != null && <span>₪{deal.value}</span>}
+                {deal.value != null && <span>{formatMoney(deal.value, hidden)}</span>}
                 <Badge variant="secondary">{deal.stage}</Badge>
               </div>
             </div>
