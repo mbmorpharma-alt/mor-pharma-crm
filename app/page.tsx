@@ -101,6 +101,18 @@ export default function DashboardPage() {
     return { name, leadsCount: leads.length, closedCount: closed.length, revenue };
   }).filter((c) => c.leadsCount > 0 || c.closedCount > 0);
 
+  const untaggedLeads = periodLeads.filter((c) => !c.campaign);
+  const untaggedClosed = periodWonDeals.filter((d) => !d.contact?.campaign);
+  const untaggedRevenue = untaggedClosed.reduce((sum, d) => sum + (d.value ?? 0), 0);
+  if (untaggedLeads.length > 0 || untaggedClosed.length > 0) {
+    campaignStats.push({
+      name: "ללא קמפיין",
+      leadsCount: untaggedLeads.length,
+      closedCount: untaggedClosed.length,
+      revenue: untaggedRevenue,
+    });
+  }
+
   const liveStatCards = [
     { label: "אנשי קשר", value: contacts.length },
     { label: "משימות ממתינות", value: pendingTasks.length },
@@ -182,11 +194,22 @@ export default function DashboardPage() {
                   </thead>
                   <tbody>
                     {campaignStats.map((c) => (
-                      <tr key={c.name} className="border-b last:border-0">
+                      <tr
+                        key={c.name}
+                        className={cn(
+                          "border-b last:border-0",
+                          c.name === "ללא קמפיין" && "text-muted-foreground italic"
+                        )}
+                      >
                         <td className="py-2 pe-3">{c.name}</td>
                         <td className="py-2 px-3 tabular-nums">{c.leadsCount}</td>
                         <td className="py-2 px-3 tabular-nums">{c.closedCount}</td>
-                        <td className="py-2 ps-3 font-semibold text-green-700">
+                        <td
+                          className={cn(
+                            "py-2 ps-3 font-semibold",
+                            c.name === "ללא קמפיין" ? "text-muted-foreground" : "text-green-700"
+                          )}
+                        >
                           {formatMoney(c.revenue, hidden)}
                         </td>
                       </tr>
