@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { STATUSES } from "@/lib/statuses";
+import { CAMPAIGN_NAMES } from "@/lib/campaigns";
 
 export type ContactFormValues = {
   id?: number;
@@ -31,6 +32,7 @@ export type ContactFormValues = {
   notes: string;
   status: string;
   isExistingCustomer: boolean;
+  campaign: string;
   whatsappSummary: string;
 };
 
@@ -42,6 +44,7 @@ const EMPTY: ContactFormValues = {
   notes: "",
   status: "חדש",
   isExistingCustomer: false,
+  campaign: "",
   whatsappSummary: "",
 };
 
@@ -150,6 +153,27 @@ export function ContactFormDialog({
                   {STATUSES.map((s) => (
                     <SelectItem key={s} value={s}>
                       {s}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="col-span-2">
+              <Label htmlFor="campaign">קמפיין</Label>
+              <Select
+                value={values.campaign}
+                onValueChange={(v) =>
+                  setValues({ ...values, campaign: !v || v === "none" ? "" : v })
+                }
+              >
+                <SelectTrigger id="campaign" className="w-full">
+                  <SelectValue placeholder="ללא קמפיין" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">ללא קמפיין</SelectItem>
+                  {CAMPAIGN_NAMES.map((c) => (
+                    <SelectItem key={c} value={c}>
+                      {c}
                     </SelectItem>
                   ))}
                 </SelectContent>

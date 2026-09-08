@@ -7,11 +7,13 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const search = searchParams.get("search") || "";
   const status = searchParams.get("status") || "";
+  const campaign = searchParams.get("campaign") || "";
 
   const contacts = await prisma.contact.findMany({
     where: {
       AND: [
         status ? { status } : {},
+        campaign ? { campaign } : {},
         search
           ? {
               OR: [
@@ -54,6 +56,7 @@ export async function POST(request: NextRequest) {
       notes: body.notes || null,
       status: body.status || "חדש",
       isExistingCustomer: body.isExistingCustomer ?? false,
+      campaign: body.campaign || null,
       bookCount: body.bookCount || null,
       whatsappSummary: body.whatsappSummary || null,
     },

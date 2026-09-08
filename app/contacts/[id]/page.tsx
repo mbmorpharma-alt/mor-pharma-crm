@@ -54,6 +54,7 @@ type ContactDetail = {
   notes: string | null;
   status: string;
   isExistingCustomer: boolean;
+  campaign: string | null;
   whatsappSummary: string | null;
   deals: Deal[];
   tasks: Task[];
@@ -139,6 +140,7 @@ export default function ContactProfilePage({
     notes: contact.notes ?? "",
     status: contact.status,
     isExistingCustomer: contact.isExistingCustomer,
+    campaign: contact.campaign ?? "",
     whatsappSummary: contact.whatsappSummary ?? "",
   };
 
@@ -201,6 +203,10 @@ export default function ContactProfilePage({
           <div>
             <span className="text-muted-foreground">אימייל: </span>
             {contact.email || "—"}
+          </div>
+          <div>
+            <span className="text-muted-foreground">קמפיין: </span>
+            {contact.campaign || "—"}
           </div>
           <div className="col-span-2">
             <span className="text-muted-foreground">הערות: </span>

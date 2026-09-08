@@ -42,6 +42,7 @@ export async function PUT(
       notes: body.notes ?? null,
       status: body.status,
       isExistingCustomer: body.isExistingCustomer ?? false,
+      campaign: body.campaign ?? null,
       bookCount: body.bookCount ?? null,
       whatsappSummary: body.whatsappSummary ?? null,
     },

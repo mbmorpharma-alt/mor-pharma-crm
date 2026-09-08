@@ -5,11 +5,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MonthPicker } from "@/components/month-picker";
 import { usePrivacyMode, formatMoney, BLUR_NAME_CLASS } from "@/lib/use-privacy-mode";
 import { cn } from "@/lib/utils";
+import { CAMPAIGN_NAMES } from "@/lib/campaigns";
 
 type Contact = {
   id: number;
   name: string;
   status: string;
+  campaign: string | null;
   createdAt: string;
 };
 
@@ -27,7 +29,7 @@ type Deal = {
   value: number | null;
   stage: string;
   createdAt: string;
-  contact: { id: number; name: string } | null;
+  contact: { id: number; name: string; campaign: string | null } | null;
   wasExistingCustomer: boolean | null;
 };
 
@@ -92,6 +94,13 @@ export default function DashboardPage() {
   });
   const periodLabel = `${String(periodMonth + 1).padStart(2, "0")}/${periodYear}`;
 
+  const campaignStats = CAMPAIGN_NAMES.map((name) => {
+    const leads = periodLeads.filter((c) => c.campaign === name);
+    const closed = periodWonDeals.filter((d) => d.contact?.campaign === name);
+    const revenue = closed.reduce((sum, d) => sum + (d.value ?? 0), 0);
+    return { name, leadsCount: leads.length, closedCount: closed.length, revenue };
+  }).filter((c) => c.leadsCount > 0 || c.closedCount > 0);
+
   const liveStatCards = [
     { label: "אנשי קשר", value: contacts.length },
     { label: "משימות ממתינות", value: pendingTasks.length },
@@ -153,6 +162,42 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>📣 קמפיינים ב-{periodLabel}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {campaignStats.length === 0 ? (
+              <p className="text-sm text-muted-foreground">אין עדיין לידים או מכירות מתויגים לקמפיין בתקופה הזו</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b text-right text-muted-foreground">
+                      <th className="py-2 pe-3 font-medium">קמפיין</th>
+                      <th className="py-2 px-3 font-medium">לידים</th>
+                      <th className="py-2 px-3 font-medium">נסגרו</th>
+                      <th className="py-2 ps-3 font-medium">הכנסות</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {campaignStats.map((c) => (
+                      <tr key={c.name} className="border-b last:border-0">
+                        <td className="py-2 pe-3">{c.name}</td>
+                        <td className="py-2 px-3 tabular-nums">{c.leadsCount}</td>
+                        <td className="py-2 px-3 tabular-nums">{c.closedCount}</td>
+                        <td className="py-2 ps-3 font-semibold text-green-700">
+                          {formatMoney(c.revenue, hidden)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle>💰 מכירות ב-{periodLabel}</CardTitle>

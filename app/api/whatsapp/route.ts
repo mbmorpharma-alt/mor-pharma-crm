@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { toWhatsAppNumber } from "@/lib/whatsapp";
+import { detectCampaign } from "@/lib/campaigns";
 
 export const dynamic = "force-dynamic";
 
@@ -25,17 +26,20 @@ export async function POST(request: NextRequest) {
 
   const allContacts = await prisma.contact.findMany({
     where: { phone: { not: null } },
-    select: { id: true, phone: true },
+    select: { id: true, phone: true, campaign: true },
   });
   const match = allContacts.find(
     (c) => c.phone && toWhatsAppNumber(c.phone) === normalized
   );
+
+  const detectedCampaign = detectCampaign(message);
 
   const contact = match
     ? await prisma.contact.update({
         where: { id: match.id },
         data: {
           name: name && name.trim() ? name : undefined,
+          campaign: !match.campaign && detectedCampaign ? detectedCampaign : undefined,
         },
       })
     : await prisma.contact.create({
@@ -43,6 +47,7 @@ export async function POST(request: NextRequest) {
           name: name && name.trim() ? name : `ליד וואטסאפ ${phone}`,
           phone,
           status: "חדש",
+          campaign: detectedCampaign ?? undefined,
         },
       });
 

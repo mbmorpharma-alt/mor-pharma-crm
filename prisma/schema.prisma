@@ -16,6 +16,7 @@ model Contact {
   notes           String?
   status          String     @default("חדש")
   isExistingCustomer Boolean @default(false)
+  campaign        String?
   bookCount       String?
   whatsappSummary String?
   createdAt       DateTime   @default(now())

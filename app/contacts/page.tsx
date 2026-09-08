@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { STATUSES, STATUS_COLORS } from "@/lib/statuses";
+import { CAMPAIGN_NAMES } from "@/lib/campaigns";
 import { toWhatsAppNumber } from "@/lib/whatsapp";
 import { ContactFormDialog, ContactFormValues } from "@/components/contact-form-dialog";
 import { FollowUpMenu } from "@/components/follow-up-menu";
@@ -63,6 +64,7 @@ type Contact = {
   notes: string | null;
   status: string;
   isExistingCustomer: boolean;
+  campaign: string | null;
   whatsappSummary: string | null;
   createdAt: string;
   tasks: Task[];
@@ -73,6 +75,7 @@ export default function ContactsPage() {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [campaignFilter, setCampaignFilter] = useState("");
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<ContactFormValues | null>(null);
@@ -92,6 +95,7 @@ export default function ContactsPage() {
     const params = new URLSearchParams();
     if (search) params.set("search", search);
     if (statusFilter) params.set("status", statusFilter);
+    if (campaignFilter) params.set("campaign", campaignFilter);
     const res = await fetch(`/api/contacts?${params.toString()}`);
     const data: Contact[] = await res.json();
     data.sort((a, b) => {
@@ -101,7 +105,7 @@ export default function ContactsPage() {
     });
     setContacts(data);
     setLoading(false);
-  }, [search, statusFilter]);
+  }, [search, statusFilter, campaignFilter]);
 
   useEffect(() => {
     const timeout = setTimeout(load, 250);
@@ -213,6 +217,22 @@ export default function ContactsPage() {
             ))}
           </SelectContent>
         </Select>
+        <Select
+          value={campaignFilter}
+          onValueChange={(v) => setCampaignFilter(!v || v === "all" ? "" : v)}
+        >
+          <SelectTrigger className="w-48">
+            <SelectValue placeholder="כל הקמפיינים" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">כל הקמפיינים</SelectItem>
+            {CAMPAIGN_NAMES.map((c) => (
+              <SelectItem key={c} value={c}>
+                {c}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="rounded-lg border bg-background">
@@ -225,6 +245,7 @@ export default function ContactsPage() {
               <TableHead>משימה קרובה</TableHead>
               <TableHead>תאריך שינוי משימה</TableHead>
               <TableHead>שם העסק</TableHead>
+              <TableHead>קמפיין</TableHead>
               <TableHead>סטטוס</TableHead>
               <TableHead>פעולות</TableHead>
             </TableRow>
@@ -232,14 +253,14 @@ export default function ContactsPage() {
           <TableBody>
             {loading && (
               <TableRow>
-                <TableCell colSpan={8} className="text-center text-muted-foreground">
+                <TableCell colSpan={9} className="text-center text-muted-foreground">
                   טוען...
                 </TableCell>
               </TableRow>
             )}
             {!loading && contacts.length === 0 && (
               <TableRow>
-                <TableCell colSpan={8} className="text-center text-muted-foreground">
+                <TableCell colSpan={9} className="text-center text-muted-foreground">
                   לא נמצאו אנשי קשר
                 </TableCell>
               </TableRow>
@@ -395,6 +416,15 @@ export default function ContactsPage() {
                     )}
                   </TableCell>
                   <TableCell>
+                    {contact.campaign ? (
+                      <Badge variant="outline" className="text-xs text-muted-foreground">
+                        📣 {contact.campaign}
+                      </Badge>
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
+                  </TableCell>
+                  <TableCell>
                     <Select
                       value={contact.status}
                       onValueChange={(v) => {
@@ -447,6 +477,7 @@ export default function ContactsPage() {
                             notes: contact.notes ?? "",
                             status: contact.status,
                             isExistingCustomer: contact.isExistingCustomer,
+                            campaign: contact.campaign ?? "",
                             whatsappSummary: contact.whatsappSummary ?? "",
                           });
                           setDialogOpen(true);
