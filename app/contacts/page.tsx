@@ -121,6 +121,17 @@ export default function ContactsPage() {
     });
   }
 
+  async function updateCampaign(id: number, campaign: string | null) {
+    const current = contacts.find((c) => c.id === id);
+    if (!current) return;
+    setContacts((prev) => prev.map((c) => (c.id === id ? { ...c, campaign } : c)));
+    await fetch(`/api/contacts/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...current, campaign }),
+    });
+  }
+
   async function toggleCustomerType(id: number) {
     const current = contacts.find((c) => c.id === id);
     if (!current) return;
@@ -243,9 +254,7 @@ export default function ContactsPage() {
               <TableHead>חדש/קיים</TableHead>
               <TableHead>טלפון</TableHead>
               <TableHead>משימה קרובה</TableHead>
-              <TableHead>תאריך שינוי משימה</TableHead>
               <TableHead>שם העסק</TableHead>
-              <TableHead>קמפיין</TableHead>
               <TableHead>סטטוס</TableHead>
               <TableHead>פעולות</TableHead>
             </TableRow>
@@ -253,14 +262,14 @@ export default function ContactsPage() {
           <TableBody>
             {loading && (
               <TableRow>
-                <TableCell colSpan={9} className="text-center text-muted-foreground">
+                <TableCell colSpan={7} className="text-center text-muted-foreground">
                   טוען...
                 </TableCell>
               </TableRow>
             )}
             {!loading && contacts.length === 0 && (
               <TableRow>
-                <TableCell colSpan={9} className="text-center text-muted-foreground">
+                <TableCell colSpan={7} className="text-center text-muted-foreground">
                   לא נמצאו אנשי קשר
                 </TableCell>
               </TableRow>
@@ -289,6 +298,26 @@ export default function ContactsPage() {
                     <div className="text-xs text-muted-foreground">
                       {formatJoinDate(contact.createdAt)}
                     </div>
+                    <Select
+                      value={contact.campaign ?? ""}
+                      onValueChange={(v) =>
+                        updateCampaign(contact.id, !v || v === "none" ? null : v)
+                      }
+                    >
+                      <SelectTrigger className="mt-0.5 h-5 w-fit gap-1 border-none bg-transparent p-0 text-xs text-muted-foreground shadow-none hover:underline [&_svg]:size-3">
+                        <SelectValue placeholder="+ הוסף קמפיין">
+                          {contact.campaign && `📣 ${contact.campaign}`}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">ללא קמפיין</SelectItem>
+                        {CAMPAIGN_NAMES.map((c) => (
+                          <SelectItem key={c} value={c}>
+                            {c}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </TableCell>
                   <TableCell>
                     <button
@@ -370,21 +399,22 @@ export default function ContactsPage() {
                         📅
                       </button>
                     </div>
+                    {nextTask && (
+                      <div className="mt-0.5 text-[11px] text-muted-foreground">
+                        עודכן{" "}
+                        {new Date(nextTask.updatedAt).toLocaleDateString("he-IL", {
+                          day: "numeric",
+                          month: "short",
+                        })}{" "}
+                        {new Date(nextTask.updatedAt).toLocaleTimeString("he-IL", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </div>
+                    )}
                     {contact.activities[0] && (
                       <div className="mt-1 text-xs text-green-700">
                         {contact.activities[0].note}
-                      </div>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {nextTask && (
-                      <div className="text-xs font-semibold text-foreground">
-                        <div>
-                          תאריך - {new Date(nextTask.updatedAt).toLocaleDateString("he-IL", { day: "numeric", month: "long" })}
-                        </div>
-                        <div>
-                          שעה - {new Date(nextTask.updatedAt).toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" })}
-                        </div>
                       </div>
                     )}
                   </TableCell>
@@ -413,15 +443,6 @@ export default function ContactsPage() {
                           🏢 {contact.company || "הוסף עסק"}
                         </Badge>
                       </button>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {contact.campaign ? (
-                      <Badge variant="outline" className="text-xs text-muted-foreground">
-                        📣 {contact.campaign}
-                      </Badge>
-                    ) : (
-                      <span className="text-muted-foreground">—</span>
                     )}
                   </TableCell>
                   <TableCell>
