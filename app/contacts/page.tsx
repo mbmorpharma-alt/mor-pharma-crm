@@ -197,6 +197,35 @@ export default function ContactsPage() {
     load();
   }
 
+  const paginationBar = total > 0 && (
+    <div className="flex items-center justify-between text-sm text-muted-foreground">
+      <span>
+        מציג {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, total)} מתוך {total}
+      </span>
+      <div className="flex items-center gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={page <= 1}
+          onClick={() => setPage((p) => Math.max(1, p - 1))}
+        >
+          הקודם
+        </Button>
+        <span>
+          עמוד {page} מתוך {Math.max(1, Math.ceil(total / PAGE_SIZE))}
+        </span>
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={page * PAGE_SIZE >= total}
+          onClick={() => setPage((p) => p + 1)}
+        >
+          הבא
+        </Button>
+      </div>
+    </div>
+  );
+
   return (
     <div dir="rtl" className="mx-auto w-full max-w-none p-4 flex flex-col gap-4">
       <div className="flex items-center justify-between">
@@ -251,6 +280,8 @@ export default function ContactsPage() {
           </SelectContent>
         </Select>
       </div>
+
+      {paginationBar}
 
       <div className="rounded-lg border bg-background">
         <Table>
@@ -528,34 +559,7 @@ export default function ContactsPage() {
         </Table>
       </div>
 
-      {total > 0 && (
-        <div className="flex items-center justify-between text-sm text-muted-foreground">
-          <span>
-            מציג {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, total)} מתוך {total}
-          </span>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={page <= 1}
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-            >
-              הקודם
-            </Button>
-            <span>
-              עמוד {page} מתוך {Math.max(1, Math.ceil(total / PAGE_SIZE))}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={page * PAGE_SIZE >= total}
-              onClick={() => setPage((p) => p + 1)}
-            >
-              הבא
-            </Button>
-          </div>
-        </div>
-      )}
+      {paginationBar}
 
       <ContactFormDialog
         open={dialogOpen}
