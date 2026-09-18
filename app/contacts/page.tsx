@@ -71,8 +71,12 @@ type Contact = {
   activities: { id: number; note: string }[];
 };
 
+const PAGE_SIZE = 50;
+
 export default function ContactsPage() {
   const [contacts, setContacts] = useState<Contact[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [campaignFilter, setCampaignFilter] = useState("");
@@ -96,15 +100,17 @@ export default function ContactsPage() {
     if (search) params.set("search", search);
     if (statusFilter) params.set("status", statusFilter);
     if (campaignFilter) params.set("campaign", campaignFilter);
+    params.set("page", String(page));
+    params.set("pageSize", String(PAGE_SIZE));
     const res = await fetch(`/api/contacts?${params.toString()}`);
-    const data: Contact[] = await res.json();
-    data.sort((a, b) => {
-      const aTime = new Date(a.tasks[0]?.updatedAt ?? a.createdAt).getTime();
-      const bTime = new Date(b.tasks[0]?.updatedAt ?? b.createdAt).getTime();
-      return bTime - aTime;
-    });
-    setContacts(data);
+    const data: { contacts: Contact[]; total: number } = await res.json();
+    setContacts(data.contacts);
+    setTotal(data.total);
     setLoading(false);
+  }, [search, statusFilter, campaignFilter, page]);
+
+  useEffect(() => {
+    setPage(1);
   }, [search, statusFilter, campaignFilter]);
 
   useEffect(() => {
@@ -521,6 +527,35 @@ export default function ContactsPage() {
           </TableBody>
         </Table>
       </div>
+
+      {total > 0 && (
+        <div className="flex items-center justify-between text-sm text-muted-foreground">
+          <span>
+            מציג {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, total)} מתוך {total}
+          </span>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page <= 1}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+            >
+              הקודם
+            </Button>
+            <span>
+              עמוד {page} מתוך {Math.max(1, Math.ceil(total / PAGE_SIZE))}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page * PAGE_SIZE >= total}
+              onClick={() => setPage((p) => p + 1)}
+            >
+              הבא
+            </Button>
+          </div>
+        </div>
+      )}
 
       <ContactFormDialog
         open={dialogOpen}
