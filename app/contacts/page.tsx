@@ -71,7 +71,7 @@ type Contact = {
   activities: { id: number; note: string }[];
 };
 
-const PAGE_SIZE = 50;
+const PAGE_SIZE = 100;
 
 export default function ContactsPage() {
   const [contacts, setContacts] = useState<Contact[]>([]);
