@@ -34,33 +34,42 @@ export function TaskFormDialog({
 }) {
   const [values, setValues] = useState<TaskFormValues>(EMPTY);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (open) {
       setValues(initial ?? EMPTY);
+      setError("");
     }
   }, [open, initial]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
+    setError("");
 
     const url = values.id ? `/api/tasks/${values.id}` : "/api/tasks";
     const method = values.id ? "PUT" : "POST";
 
-    await fetch(url, {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        title: values.title,
-        dueDate: values.dueDate || null,
-        contactId: values.contactId || null,
-      }),
-    });
-
-    setSaving(false);
-    onOpenChange(false);
-    onSaved();
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: values.title,
+          dueDate: values.dueDate || null,
+          contactId: values.contactId || null,
+        }),
+        signal: AbortSignal.timeout(15_000),
+      });
+      if (!res.ok) throw new Error("השמירה נכשלה, נסה שוב");
+      onOpenChange(false);
+      onSaved();
+    } catch {
+      setError("השמירה נכשלה או נמשכת יותר מדי זמן — בדוק חיבור ונסה שוב");
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -88,6 +97,7 @@ export function TaskFormDialog({
               onChange={(e) => setValues({ ...values, dueDate: e.target.value })}
             />
           </div>
+          {error && <p className="text-sm text-destructive">{error}</p>}
           <DialogFooter>
             <Button type="submit" disabled={saving}>
               {saving ? "שומר..." : "שמירה"}

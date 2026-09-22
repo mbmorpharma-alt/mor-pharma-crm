@@ -53,11 +53,13 @@ export function DealFormDialog({
 }) {
   const [values, setValues] = useState<DealFormValues>(EMPTY);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
   const [contacts, setContacts] = useState<ContactOption[]>([]);
 
   useEffect(() => {
     if (open) {
       setValues(initial ?? EMPTY);
+      setError("");
       fetch("/api/contacts")
         .then((res) => res.json())
         .then((data) => setContacts(data));
@@ -67,25 +69,32 @@ export function DealFormDialog({
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
+    setError("");
 
     const url = values.id ? `/api/deals/${values.id}` : "/api/deals";
     const method = values.id ? "PUT" : "POST";
 
-    await fetch(url, {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        title: values.title,
-        value: values.value || null,
-        stage: values.stage,
-        notes: values.notes || null,
-        contactId: values.contactId || null,
-      }),
-    });
-
-    setSaving(false);
-    onOpenChange(false);
-    onSaved();
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: values.title,
+          value: values.value || null,
+          stage: values.stage,
+          notes: values.notes || null,
+          contactId: values.contactId || null,
+        }),
+        signal: AbortSignal.timeout(15_000),
+      });
+      if (!res.ok) throw new Error("השמירה נכשלה, נסה שוב");
+      onOpenChange(false);
+      onSaved();
+    } catch {
+      setError("השמירה נכשלה או נמשכת יותר מדי זמן — בדוק חיבור ונסה שוב");
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -160,6 +169,7 @@ export function DealFormDialog({
               onChange={(e) => setValues({ ...values, notes: e.target.value })}
             />
           </div>
+          {error && <p className="text-sm text-destructive">{error}</p>}
           <DialogFooter>
             <Button type="submit" disabled={saving}>
               {saving ? "שומר..." : "שמירה"}

@@ -25,17 +25,27 @@ export function CloseDealDialog({
 }) {
   const [amount, setAmount] = useState("");
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    if (open) setAmount("");
+    if (open) {
+      setAmount("");
+      setError("");
+    }
   }, [open]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
-    await onConfirm(Number(amount));
-    setSaving(false);
-    onOpenChange(false);
+    setError("");
+    try {
+      await onConfirm(Number(amount));
+      onOpenChange(false);
+    } catch {
+      setError("השמירה נכשלה או נמשכת יותר מדי זמן — בדוק חיבור ונסה שוב");
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -58,6 +68,7 @@ export function CloseDealDialog({
               onChange={(e) => setAmount(e.target.value)}
             />
           </div>
+          {error && <p className="text-sm text-destructive">{error}</p>}
           <DialogFooter>
             <Button type="submit" disabled={saving}>
               {saving ? "שומר..." : "סגירה ורישום עסקה"}

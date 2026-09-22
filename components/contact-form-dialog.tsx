@@ -61,29 +61,38 @@ export function ContactFormDialog({
 }) {
   const [values, setValues] = useState<ContactFormValues>(EMPTY);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (open) {
       setValues(initial ?? EMPTY);
+      setError("");
     }
   }, [open, initial]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
+    setError("");
 
     const url = values.id ? `/api/contacts/${values.id}` : "/api/contacts";
     const method = values.id ? "PUT" : "POST";
 
-    await fetch(url, {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(values),
-    });
-
-    setSaving(false);
-    onOpenChange(false);
-    onSaved();
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
+        signal: AbortSignal.timeout(15_000),
+      });
+      if (!res.ok) throw new Error("השמירה נכשלה, נסה שוב");
+      onOpenChange(false);
+      onSaved();
+    } catch {
+      setError("השמירה נכשלה או נמשכת יותר מדי זמן — בדוק חיבור ונסה שוב");
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -198,6 +207,7 @@ export function ContactFormDialog({
               />
             </div>
           </div>
+          {error && <p className="text-sm text-destructive">{error}</p>}
           <DialogFooter>
             <Button type="submit" disabled={saving}>
               {saving ? "שומר..." : "שמירה"}

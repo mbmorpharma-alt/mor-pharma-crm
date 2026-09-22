@@ -124,6 +124,7 @@ export default function ContactsPage() {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ...contacts.find((c) => c.id === id), status }),
+      signal: AbortSignal.timeout(15_000),
     });
   }
 
@@ -178,6 +179,7 @@ export default function ContactsPage() {
         contactId: closeDealContact.id,
         wasExistingCustomer: closeDealContact.isExistingCustomer,
       }),
+      signal: AbortSignal.timeout(15_000),
     });
     setCloseDealContact(null);
   }
