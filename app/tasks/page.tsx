@@ -80,37 +80,40 @@ function contactPillColor(id: number) {
   return CONTACT_PILL_COLORS[id % CONTACT_PILL_COLORS.length];
 }
 
+const PAGE_SIZE = 100;
+
 export default function TasksPage() {
   const { hidden } = usePrivacyMode();
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const [pending, setPending] = useState<Task[]>([]);
+  const [pendingTotal, setPendingTotal] = useState(0);
+  const [pendingPage, setPendingPage] = useState(1);
+  const [done, setDone] = useState<Task[]>([]);
+  const [doneTotal, setDoneTotal] = useState(0);
+  const [donePage, setDonePage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<TaskFormValues | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
-    const res = await fetch("/api/tasks");
-    const data: Task[] = await res.json();
-
-    data.sort((a, b) => {
-      if (!a.dueDate && !b.dueDate) return 0;
-      if (!a.dueDate) return 1;
-      if (!b.dueDate) return -1;
-      return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
-    });
-
-    setTasks(data);
+    const [pendingRes, doneRes] = await Promise.all([
+      fetch(`/api/tasks?completed=false&page=${pendingPage}&pageSize=${PAGE_SIZE}`),
+      fetch(`/api/tasks?completed=true&page=${donePage}&pageSize=${PAGE_SIZE}`),
+    ]);
+    const pendingData: { tasks: Task[]; total: number } = await pendingRes.json();
+    const doneData: { tasks: Task[]; total: number } = await doneRes.json();
+    setPending(pendingData.tasks);
+    setPendingTotal(pendingData.total);
+    setDone(doneData.tasks);
+    setDoneTotal(doneData.total);
     setLoading(false);
-  }, []);
+  }, [pendingPage, donePage]);
 
   useEffect(() => {
     load();
   }, [load]);
 
   async function toggleCompleted(task: Task) {
-    setTasks((prev) =>
-      prev.map((t) => (t.id === task.id ? { ...t, completed: !t.completed } : t))
-    );
     await fetch(`/api/tasks/${task.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -121,6 +124,7 @@ export default function TasksPage() {
         contactId: task.contact?.id ?? null,
       }),
     });
+    load();
   }
 
   async function deleteTask(id: number) {
@@ -129,8 +133,41 @@ export default function TasksPage() {
     load();
   }
 
-  const pending = tasks.filter((t) => !t.completed);
-  const done = tasks.filter((t) => t.completed);
+  function paginationBar(
+    page: number,
+    setPage: (p: number) => void,
+    total: number
+  ) {
+    if (total <= PAGE_SIZE) return null;
+    return (
+      <div className="flex items-center justify-between text-sm text-muted-foreground">
+        <span>
+          מציג {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, total)} מתוך {total}
+        </span>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={page <= 1}
+            onClick={() => setPage(Math.max(1, page - 1))}
+          >
+            הקודם
+          </Button>
+          <span>
+            עמוד {page} מתוך {Math.max(1, Math.ceil(total / PAGE_SIZE))}
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={page * PAGE_SIZE >= total}
+            onClick={() => setPage(page + 1)}
+          >
+            הבא
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   function renderTaskRow(task: Task) {
     return (
@@ -241,33 +278,38 @@ export default function TasksPage() {
         <>
           <div className="flex flex-col gap-2">
             <h2 className="text-sm font-semibold text-muted-foreground">
-              ממתינות ({pending.length})
+              ממתינות ({pendingTotal})
             </h2>
             {pending.length === 0 ? (
               <p className="text-sm text-muted-foreground">אין משימות ממתינות</p>
             ) : (
-              <div className="rounded-lg border bg-background">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>שם</TableHead>
-                      <TableHead>טלפון</TableHead>
-                      <TableHead>משימה</TableHead>
-                      <TableHead>סטטוס</TableHead>
-                      <TableHead>פעולות</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>{pending.map(renderTaskRow)}</TableBody>
-                </Table>
-              </div>
+              <>
+                {paginationBar(pendingPage, setPendingPage, pendingTotal)}
+                <div className="rounded-lg border bg-background">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>שם</TableHead>
+                        <TableHead>טלפון</TableHead>
+                        <TableHead>משימה</TableHead>
+                        <TableHead>סטטוס</TableHead>
+                        <TableHead>פעולות</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>{pending.map(renderTaskRow)}</TableBody>
+                  </Table>
+                </div>
+                {paginationBar(pendingPage, setPendingPage, pendingTotal)}
+              </>
             )}
           </div>
 
-          {done.length > 0 && (
+          {doneTotal > 0 && (
             <div className="flex flex-col gap-2">
               <h2 className="text-sm font-semibold text-muted-foreground">
-                הושלמו ({done.length})
+                הושלמו ({doneTotal})
               </h2>
+              {paginationBar(donePage, setDonePage, doneTotal)}
               <div className="rounded-lg border bg-background">
                 <Table>
                   <TableHeader>
@@ -282,6 +324,7 @@ export default function TasksPage() {
                   <TableBody>{done.map(renderTaskRow)}</TableBody>
                 </Table>
               </div>
+              {paginationBar(donePage, setDonePage, doneTotal)}
             </div>
           )}
         </>
