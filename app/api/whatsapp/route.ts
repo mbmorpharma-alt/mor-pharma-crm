@@ -23,41 +23,52 @@ export async function POST(request: NextRequest) {
   }
 
   const normalized = toWhatsAppNumber(phone);
-
-  const allContacts = await prisma.contact.findMany({
-    where: { phone: { not: null } },
-    select: { id: true, phone: true, campaign: true },
-  });
-  const match = allContacts.find(
-    (c) => c.phone && toWhatsAppNumber(c.phone) === normalized
-  );
-
   const detectedCampaign = detectCampaign(message);
 
-  const contact = match
-    ? await prisma.contact.update({
-        where: { id: match.id },
-        data: {
-          name: name && name.trim() ? name : undefined,
-          campaign: !match.campaign && detectedCampaign ? detectedCampaign : undefined,
-        },
-      })
-    : await prisma.contact.create({
-        data: {
-          name: name && name.trim() ? name : `ליד וואטסאפ ${phone}`,
-          phone,
-          status: "חדש",
-          campaign: detectedCampaign ?? undefined,
-        },
-      });
+  // WhatsApp (or the bot) can deliver the same message's webhook twice in
+  // quick succession. A Postgres advisory lock keyed by the normalized phone
+  // serializes those concurrent calls, so the second one always sees the
+  // contact the first one just created instead of racing it and creating a
+  // duplicate.
+  const result = await prisma.$transaction(async (tx) => {
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${normalized})::bigint)`;
+
+    const allContacts = await tx.contact.findMany({
+      where: { phone: { not: null } },
+      select: { id: true, phone: true, campaign: true },
+    });
+    const match = allContacts.find(
+      (c) => c.phone && toWhatsAppNumber(c.phone) === normalized
+    );
+
+    const isNew = !match;
+    const updatedOrCreated = match
+      ? await tx.contact.update({
+          where: { id: match.id },
+          data: {
+            name: name && name.trim() ? name : undefined,
+            campaign: !match.campaign && detectedCampaign ? detectedCampaign : undefined,
+          },
+        })
+      : await tx.contact.create({
+          data: {
+            name: name && name.trim() ? name : `ליד וואטסאפ ${phone}`,
+            phone,
+            status: "חדש",
+            campaign: detectedCampaign ?? undefined,
+          },
+        });
+
+    return { contact: updatedOrCreated, isNew };
+  });
 
   await prisma.activity.create({
     data: {
       type: "וואטסאפ",
       note: message || "פנייה חדשה בוואטסאפ",
-      contactId: contact.id,
+      contactId: result.contact.id,
     },
   });
 
-  return NextResponse.json({ ok: true, contactId: contact.id, isNew: !match });
+  return NextResponse.json({ ok: true, contactId: result.contact.id, isNew: result.isNew });
 }
