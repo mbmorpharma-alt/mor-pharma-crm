@@ -10,3 +10,17 @@ export const STATUS_COLORS: Record<string, string> = {
   "✅ סגור": "bg-green-100 text-green-800",
   "🚫 לא רלוונטי": "bg-neutral-200 text-neutral-700",
 };
+
+// Validated categorical palette (fixed hue order, one hex per status) for the
+// status-breakdown chart on the dashboard — a different concern from the
+// badge classes above, which just need to look OK next to Hebrew text.
+export const STATUS_CHART_COLORS: Record<string, string> = {
+  "חדש": "#2a78d6",
+  "🔥 חם": "#eb6834",
+  "🌡️ פושר": "#1baf7a",
+  "❄️ קר": "#eda100",
+  "📵 ללא מענה": "#e87ba4",
+  "⚙️ בטיפול": "#008300",
+  "✅ סגור": "#6250d6",
+  "🚫 לא רלוונטי": "#e34948",
+};

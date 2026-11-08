@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { usePrivacyMode, formatMoney, BLUR_NAME_CLASS } from "@/lib/use-privacy-mode";
 import { cn } from "@/lib/utils";
 import { CAMPAIGN_NAMES } from "@/lib/campaigns";
+import { STATUSES, STATUS_CHART_COLORS } from "@/lib/statuses";
 
 type Contact = {
   id: number;
@@ -125,6 +126,17 @@ export default function DashboardPage() {
     });
   }
 
+  const statusBreakdown = STATUSES.map((status) => ({
+    status,
+    count: contacts.filter((c) => c.status === status).length,
+    color: STATUS_CHART_COLORS[status],
+  }))
+    .filter((s) => s.count > 0)
+    .sort((a, b) => b.count - a.count);
+  const maxStatusCount = Math.max(1, ...statusBreakdown.map((s) => s.count));
+
+  const existingVsNewTotal = revenueExisting + revenueNew;
+
   const liveStatCards = [
     { label: "אנשי קשר", value: contacts.length },
     { label: "משימות ממתינות", value: pendingTasks.length },
@@ -141,7 +153,7 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div dir="rtl" className="mx-auto max-w-6xl p-4 flex flex-col gap-6">
+    <div dir="rtl" className="mx-auto w-full max-w-none p-4 flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">דשבורד</h1>
         <div className="flex items-center gap-3">
@@ -219,9 +231,39 @@ export default function DashboardPage() {
             </Card>
           ))}
         </div>
+        {existingVsNewTotal > 0 && (
+          <div className="flex items-center gap-3 rounded-md border bg-background p-3">
+            <span className="shrink-0 text-xs text-muted-foreground">
+              חלוקת הכנסות {periodLabel}
+            </span>
+            <div className="flex h-2 flex-1 overflow-hidden rounded-full">
+              <div
+                style={{
+                  width: `${(revenueExisting / existingVsNewTotal) * 100}%`,
+                  backgroundColor: "#e34948",
+                }}
+              />
+              <div className="w-0.5 shrink-0 bg-background" />
+              <div
+                style={{
+                  width: `${(revenueNew / existingVsNewTotal) * 100}%`,
+                  backgroundColor: "#2a78d6",
+                }}
+              />
+            </div>
+            <span className="shrink-0 text-xs text-muted-foreground">
+              <span className="inline-block h-2 w-2 rounded-full align-middle" style={{ backgroundColor: "#e34948" }} />{" "}
+              קיימים {Math.round((revenueExisting / existingVsNewTotal) * 100)}%
+              {"  ·  "}
+              <span className="inline-block h-2 w-2 rounded-full align-middle" style={{ backgroundColor: "#2a78d6" }} />{" "}
+              חדשים {Math.round((revenueNew / existingVsNewTotal) * 100)}%
+            </span>
+          </div>
+        )}
       </div>
 
-      <div className="grid grid-cols-1 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div className="flex flex-col gap-4 md:col-span-2">
         <Card>
           <CardHeader>
             <CardTitle>📣 קמפיינים ב-{periodLabel}</CardTitle>
@@ -316,6 +358,35 @@ export default function DashboardPage() {
                   {formatMoney(d.value ?? 0, hidden)}
                 </span>
               </a>
+            ))}
+          </CardContent>
+        </Card>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>🧭 אנשי קשר לפי סטטוס</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-2.5">
+            {statusBreakdown.length === 0 && (
+              <p className="text-sm text-muted-foreground">אין עדיין אנשי קשר</p>
+            )}
+            {statusBreakdown.map((s) => (
+              <div key={s.status} className="flex items-center gap-2 text-sm">
+                <span className="w-24 shrink-0 truncate">{s.status}</span>
+                <div className="h-3.5 flex-1 overflow-hidden rounded-full bg-muted">
+                  <div
+                    className="h-full rounded-full"
+                    style={{
+                      width: `${(s.count / maxStatusCount) * 100}%`,
+                      backgroundColor: s.color,
+                    }}
+                  />
+                </div>
+                <span className="w-6 shrink-0 text-end tabular-nums text-muted-foreground">
+                  {s.count}
+                </span>
+              </div>
             ))}
           </CardContent>
         </Card>
