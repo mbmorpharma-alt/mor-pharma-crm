@@ -55,16 +55,24 @@ export async function GET(request: NextRequest) {
   const page = Math.max(1, Number(pageParam) || 1);
   const pageSize = Math.min(200, Math.max(1, Number(searchParams.get("pageSize")) || 50));
 
-  const [pageContacts, total] = await Promise.all([
-    prisma.contact.findMany({
-      where,
-      include,
-      orderBy: { lastActivityAt: "desc" },
-      skip: (page - 1) * pageSize,
-      take: pageSize,
-    }),
-    prisma.contact.count({ where }),
-  ]);
+  // Sort key (most recently touched first) depends on each contact's
+  // nearest open task, which Prisma can't sort by directly — so fetch every
+  // matching contact with its task/activity `include` (the same shape used
+  // above; fast — unlike the equivalent `select`, which is pathologically
+  // slow with the driver adapter), sort in memory, then slice the page.
+  // The DB round trip is cheap either way; what pagination actually saves
+  // is the JSON payload size and client-side render cost of one page vs.
+  // the full list.
+  const allMatching = await prisma.contact.findMany({ where, include });
+
+  allMatching.sort((a, b) => {
+    const aTime = new Date(a.tasks[0]?.updatedAt ?? a.createdAt).getTime();
+    const bTime = new Date(b.tasks[0]?.updatedAt ?? b.createdAt).getTime();
+    return bTime - aTime;
+  });
+
+  const total = allMatching.length;
+  const pageContacts = allMatching.slice((page - 1) * pageSize, page * pageSize);
 
   return NextResponse.json({ contacts: pageContacts, total, page, pageSize });
 }
