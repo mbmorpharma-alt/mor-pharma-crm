@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MonthPicker } from "@/components/month-picker";
+import { Input } from "@/components/ui/input";
 import { usePrivacyMode, formatMoney, BLUR_NAME_CLASS } from "@/lib/use-privacy-mode";
 import { cn } from "@/lib/utils";
 import { CAMPAIGN_NAMES } from "@/lib/campaigns";
@@ -10,6 +11,7 @@ import { CAMPAIGN_NAMES } from "@/lib/campaigns";
 type Contact = {
   id: number;
   name: string;
+  phone: string | null;
   status: string;
   campaign: string | null;
   createdAt: string;
@@ -42,6 +44,8 @@ export default function DashboardPage() {
   const today = new Date();
   const [periodYear, setPeriodYear] = useState(today.getFullYear());
   const [periodMonth, setPeriodMonth] = useState(today.getMonth());
+  const [query, setQuery] = useState("");
+  const [showResults, setShowResults] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -57,6 +61,14 @@ export default function DashboardPage() {
     }
     load();
   }, []);
+
+  const searchResults = useMemo(() => {
+    const q = query.trim();
+    if (!q) return [];
+    return contacts
+      .filter((c) => c.name.includes(q) || (c.phone ?? "").includes(q))
+      .slice(0, 8);
+  }, [contacts, query]);
 
   if (loading) {
     return <div className="p-4 text-center text-muted-foreground">טוען...</div>;
@@ -132,14 +144,50 @@ export default function DashboardPage() {
     <div dir="rtl" className="mx-auto max-w-6xl p-4 flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">דשבורד</h1>
-        <MonthPicker
-          year={periodYear}
-          month={periodMonth}
-          onChange={(y, m) => {
-            setPeriodYear(y);
-            setPeriodMonth(m);
-          }}
-        />
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <Input
+              placeholder="חיפוש לפי שם או טלפון..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onFocus={() => setShowResults(true)}
+              onBlur={() => setTimeout(() => setShowResults(false), 150)}
+              className="w-64"
+            />
+            {showResults && searchResults.length > 0 && (
+              <div className="absolute z-10 mt-1 w-full overflow-y-auto rounded-md border bg-popover shadow-md">
+                {searchResults.map((c) => (
+                  <a
+                    key={c.id}
+                    href={`/contacts/${c.id}`}
+                    className={cn(
+                      "block px-3 py-2 text-sm hover:bg-accent",
+                      hidden && BLUR_NAME_CLASS
+                    )}
+                  >
+                    {c.name}
+                    {c.phone && (
+                      <span className="text-muted-foreground"> · {c.phone}</span>
+                    )}
+                  </a>
+                ))}
+              </div>
+            )}
+            {showResults && query.trim() && searchResults.length === 0 && (
+              <div className="absolute z-10 mt-1 w-full rounded-md border bg-popover p-2 text-sm text-muted-foreground shadow-md">
+                לא נמצאו אנשי קשר
+              </div>
+            )}
+          </div>
+          <MonthPicker
+            year={periodYear}
+            month={periodMonth}
+            onChange={(y, m) => {
+              setPeriodYear(y);
+              setPeriodMonth(m);
+            }}
+          />
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
