@@ -128,30 +128,53 @@ export default function DashboardPage() {
     });
   }
 
-  const statusBreakdown = STATUSES.map((status) => ({
-    status,
-    count: contacts.filter((c) => c.status === status).length,
-    color: STATUS_CHART_COLORS[status],
-  }))
-    .filter((s) => s.count > 0)
-    .sort((a, b) => b.count - a.count);
-  const maxStatusCount = Math.max(1, ...statusBreakdown.map((s) => s.count));
+  const statusBreakdownOf = (subset: Contact[]) =>
+    STATUSES.map((status) => ({
+      status,
+      count: subset.filter((c) => c.status === status).length,
+      color: STATUS_CHART_COLORS[status],
+    }))
+      .filter((s) => s.count > 0)
+      .sort((a, b) => b.count - a.count);
 
-  const statusDonutSlices = (() => {
-    const top = statusBreakdown.slice(0, 5);
-    const restCount = statusBreakdown.slice(5).reduce((sum, s) => sum + s.count, 0);
+  const statusDonutSlicesOf = (subset: Contact[]) => {
+    const breakdown = statusBreakdownOf(subset);
+    const top = breakdown.slice(0, 5);
+    const restCount = breakdown.slice(5).reduce((sum, s) => sum + s.count, 0);
     const rest = restCount > 0 ? [{ label: "אחר", value: restCount, color: "#898781" }] : [];
     return [...top.map((s) => ({ label: s.status, value: s.count, color: s.color })), ...rest];
-  })();
+  };
 
-  const dealStageSlices = DEAL_STAGES.map((stage) => ({
-    label: stage,
-    value: deals.filter((d) => d.stage === stage).length,
-    color: DEAL_STAGE_CHART_COLORS[stage],
-  }));
+  const statusBreakdown = statusBreakdownOf(contacts);
+  const maxStatusCount = Math.max(1, ...statusBreakdown.map((s) => s.count));
+  const statusDonutSlicesTotal = statusDonutSlicesOf(contacts);
+  const statusDonutSlicesPeriod = statusDonutSlicesOf(periodLeads);
 
-  const existingVsNewTotal = revenueExisting + revenueNew;
-  const existingVsNewSlices = [
+  const dealStageSlicesOf = (subset: Deal[]) =>
+    DEAL_STAGES.map((stage) => ({
+      label: stage,
+      value: subset.filter((d) => d.stage === stage).length,
+      color: DEAL_STAGE_CHART_COLORS[stage],
+    }));
+
+  const periodDeals = deals.filter((d) => {
+    const createdAt = new Date(d.createdAt);
+    return createdAt >= periodStart && createdAt < periodEnd;
+  });
+  const dealStageSlicesTotal = dealStageSlicesOf(deals);
+  const dealStageSlicesPeriod = dealStageSlicesOf(periodDeals);
+
+  const revenueExistingTotal = wonDeals
+    .filter((d) => d.wasExistingCustomer === true)
+    .reduce((sum, d) => sum + (d.value ?? 0), 0);
+  const revenueNewTotal = wonDeals
+    .filter((d) => d.wasExistingCustomer === false)
+    .reduce((sum, d) => sum + (d.value ?? 0), 0);
+  const existingVsNewSlicesTotal = [
+    { label: "קיימים", value: revenueExistingTotal, color: "#e34948" },
+    { label: "חדשים", value: revenueNewTotal, color: "#2a78d6" },
+  ];
+  const existingVsNewSlicesPeriod = [
     { label: "קיימים", value: revenueExisting, color: "#e34948" },
     { label: "חדשים", value: revenueNew, color: "#2a78d6" },
   ];
@@ -252,36 +275,74 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardTitle>🥧 עסקאות לפי שלב</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <DonutChart slices={dealStageSlices} />
-          </CardContent>
-        </Card>
+      <div className="flex flex-col gap-3">
+        <h2 className="text-sm font-semibold text-muted-foreground">סה&quot;כ (כל הזמנים)</h2>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <Card>
+            <CardHeader>
+              <CardTitle>🥧 עסקאות לפי שלב</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <DonutChart slices={dealStageSlicesTotal} />
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>🥧 הכנסות {periodLabel} — קיימים מול חדשים</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <DonutChart
-              slices={existingVsNewSlices}
-              formatValue={(v) => formatMoney(v, hidden)}
-            />
-          </CardContent>
-        </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>🥧 הכנסות — קיימים מול חדשים</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <DonutChart
+                slices={existingVsNewSlicesTotal}
+                formatValue={(v) => formatMoney(v, hidden)}
+              />
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>🥧 אנשי קשר לפי סטטוס</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <DonutChart slices={statusDonutSlices} />
-          </CardContent>
-        </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>🥧 אנשי קשר לפי סטטוס</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <DonutChart slices={statusDonutSlicesTotal} />
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <h2 className="text-sm font-semibold text-muted-foreground">נתוני {periodLabel}</h2>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <Card>
+            <CardHeader>
+              <CardTitle>🥧 עסקאות לפי שלב ב-{periodLabel}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <DonutChart slices={dealStageSlicesPeriod} />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>🥧 הכנסות {periodLabel} — קיימים מול חדשים</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <DonutChart
+                slices={existingVsNewSlicesPeriod}
+                formatValue={(v) => formatMoney(v, hidden)}
+              />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>🥧 לידים חדשים ב-{periodLabel} לפי סטטוס</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <DonutChart slices={statusDonutSlicesPeriod} />
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
