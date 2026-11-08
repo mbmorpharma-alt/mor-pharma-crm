@@ -37,13 +37,19 @@ export async function POST(
     minute: "2-digit",
   })}`;
 
-  const activity = await prisma.activity.create({
-    data: {
-      type: "פולו אפ",
-      note: `פולו אפ נשלח ${dateLabel} - "${message}"`,
-      contactId: contact.id,
-    },
-  });
+  const [activity] = await prisma.$transaction([
+    prisma.activity.create({
+      data: {
+        type: "פולו אפ",
+        note: `פולו אפ נשלח ${dateLabel} - "${message}"`,
+        contactId: contact.id,
+      },
+    }),
+    prisma.contact.update({
+      where: { id: contact.id },
+      data: { lastActivityAt: now },
+    }),
+  ]);
 
   const nextTask = await prisma.task.findFirst({
     where: { contactId: contact.id, completed: false },

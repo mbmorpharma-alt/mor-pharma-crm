@@ -45,6 +45,7 @@ export async function PUT(
       campaign: body.campaign ?? null,
       bookCount: body.bookCount ?? null,
       whatsappSummary: body.whatsappSummary ?? null,
+      lastActivityAt: new Date(),
     },
   });
 

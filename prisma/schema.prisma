@@ -20,6 +20,7 @@ model Contact {
   bookCount       String?
   whatsappSummary String?
   createdAt       DateTime   @default(now())
+  lastActivityAt  DateTime   @default(now())
   deals           Deal[]
   tasks           Task[]
   activities      Activity[]

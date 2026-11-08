@@ -19,13 +19,19 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const body = await request.json();
 
-  const activity = await prisma.activity.create({
-    data: {
-      type: body.type,
-      note: body.note,
-      contactId: Number(body.contactId),
-    },
-  });
+  const [activity] = await prisma.$transaction([
+    prisma.activity.create({
+      data: {
+        type: body.type,
+        note: body.note,
+        contactId: Number(body.contactId),
+      },
+    }),
+    prisma.contact.update({
+      where: { id: Number(body.contactId) },
+      data: { lastActivityAt: new Date() },
+    }),
+  ]);
 
   return NextResponse.json(activity, { status: 201 });
 }

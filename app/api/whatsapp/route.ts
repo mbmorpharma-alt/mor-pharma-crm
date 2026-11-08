@@ -48,6 +48,7 @@ export async function POST(request: NextRequest) {
           data: {
             name: name && name.trim() ? name : undefined,
             campaign: !match.campaign && detectedCampaign ? detectedCampaign : undefined,
+            lastActivityAt: new Date(),
           },
         })
       : await tx.contact.create({

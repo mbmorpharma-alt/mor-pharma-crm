@@ -485,36 +485,53 @@ export default function ContactsPage() {
                     )}
                   </TableCell>
                   <TableCell>
-                    <Select
-                      value={contact.status}
-                      onValueChange={(v) => {
-                        if (!v) return;
-                        if (v === CLOSED_STATUS) {
-                          setCloseDealContact({
-                            id: contact.id,
-                            name: contact.name,
-                            isExistingCustomer: contact.isExistingCustomer,
-                          });
-                        } else {
-                          updateStatus(contact.id, v);
-                        }
-                      }}
-                    >
-                      <SelectTrigger className="w-36">
-                        <SelectValue>
-                          <Badge className={STATUS_COLORS[contact.status] ?? ""}>
-                            {contact.status}
-                          </Badge>
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        {STATUSES.map((s) => (
-                          <SelectItem key={s} value={s}>
-                            {s}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <div className="flex items-center gap-1">
+                      <Select
+                        value={contact.status}
+                        onValueChange={(v) => {
+                          if (!v) return;
+                          if (v === CLOSED_STATUS) {
+                            setCloseDealContact({
+                              id: contact.id,
+                              name: contact.name,
+                              isExistingCustomer: contact.isExistingCustomer,
+                            });
+                          } else {
+                            updateStatus(contact.id, v);
+                          }
+                        }}
+                      >
+                        <SelectTrigger className="w-36">
+                          <SelectValue>
+                            <Badge className={STATUS_COLORS[contact.status] ?? ""}>
+                              {contact.status}
+                            </Badge>
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                          {STATUSES.map((s) => (
+                            <SelectItem key={s} value={s}>
+                              {s}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {contact.status === CLOSED_STATUS && (
+                        <button
+                          onClick={() =>
+                            setCloseDealContact({
+                              id: contact.id,
+                              name: contact.name,
+                              isExistingCustomer: contact.isExistingCustomer,
+                            })
+                          }
+                          title="הלקוח חזר וסגר עסקה נוספת"
+                          className="text-muted-foreground hover:text-foreground"
+                        >
+                          💰
+                        </button>
+                      )}
+                    </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1">
