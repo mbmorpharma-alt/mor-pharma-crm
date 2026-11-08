@@ -49,6 +49,7 @@ export default function DashboardPage() {
   const [periodMonth, setPeriodMonth] = useState(today.getMonth());
   const [query, setQuery] = useState("");
   const [showResults, setShowResults] = useState(false);
+  const [donutScope, setDonutScope] = useState<"total" | "period">("period");
 
   useEffect(() => {
     async function load() {
@@ -276,14 +277,40 @@ export default function DashboardPage() {
       </div>
 
       <div className="flex flex-col gap-3">
-        <h2 className="text-sm font-semibold text-muted-foreground">סה&quot;כ (כל הזמנים)</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-muted-foreground">
+            {donutScope === "total" ? 'סה"כ (כל הזמנים)' : `נתוני ${periodLabel}`}
+          </h2>
+          <div className="flex rounded-md border p-0.5 text-sm">
+            <button
+              onClick={() => setDonutScope("period")}
+              className={cn(
+                "rounded px-3 py-1",
+                donutScope === "period" ? "bg-muted font-medium" : "text-muted-foreground"
+              )}
+            >
+              {periodLabel}
+            </button>
+            <button
+              onClick={() => setDonutScope("total")}
+              className={cn(
+                "rounded px-3 py-1",
+                donutScope === "total" ? "bg-muted font-medium" : "text-muted-foreground"
+              )}
+            >
+              סה&quot;כ
+            </button>
+          </div>
+        </div>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <Card>
             <CardHeader>
               <CardTitle>🥧 עסקאות לפי שלב</CardTitle>
             </CardHeader>
             <CardContent>
-              <DonutChart slices={dealStageSlicesTotal} />
+              <DonutChart
+                slices={donutScope === "total" ? dealStageSlicesTotal : dealStageSlicesPeriod}
+              />
             </CardContent>
           </Card>
 
@@ -293,7 +320,9 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <DonutChart
-                slices={existingVsNewSlicesTotal}
+                slices={
+                  donutScope === "total" ? existingVsNewSlicesTotal : existingVsNewSlicesPeriod
+                }
                 formatValue={(v) => formatMoney(v, hidden)}
               />
             </CardContent>
@@ -304,42 +333,9 @@ export default function DashboardPage() {
               <CardTitle>🥧 אנשי קשר לפי סטטוס</CardTitle>
             </CardHeader>
             <CardContent>
-              <DonutChart slices={statusDonutSlicesTotal} />
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-
-      <div className="flex flex-col gap-3">
-        <h2 className="text-sm font-semibold text-muted-foreground">נתוני {periodLabel}</h2>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <Card>
-            <CardHeader>
-              <CardTitle>🥧 עסקאות לפי שלב ב-{periodLabel}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <DonutChart slices={dealStageSlicesPeriod} />
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>🥧 הכנסות {periodLabel} — קיימים מול חדשים</CardTitle>
-            </CardHeader>
-            <CardContent>
               <DonutChart
-                slices={existingVsNewSlicesPeriod}
-                formatValue={(v) => formatMoney(v, hidden)}
+                slices={donutScope === "total" ? statusDonutSlicesTotal : statusDonutSlicesPeriod}
               />
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>🥧 לידים חדשים ב-{periodLabel} לפי סטטוס</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <DonutChart slices={statusDonutSlicesPeriod} />
             </CardContent>
           </Card>
         </div>
