@@ -8,6 +8,8 @@ import { usePrivacyMode, formatMoney, BLUR_NAME_CLASS } from "@/lib/use-privacy-
 import { cn } from "@/lib/utils";
 import { CAMPAIGN_NAMES } from "@/lib/campaigns";
 import { STATUSES, STATUS_CHART_COLORS } from "@/lib/statuses";
+import { DEAL_STAGES, DEAL_STAGE_CHART_COLORS } from "@/lib/deal-stages";
+import { DonutChart } from "@/components/donut-chart";
 
 type Contact = {
   id: number;
@@ -135,7 +137,24 @@ export default function DashboardPage() {
     .sort((a, b) => b.count - a.count);
   const maxStatusCount = Math.max(1, ...statusBreakdown.map((s) => s.count));
 
+  const statusDonutSlices = (() => {
+    const top = statusBreakdown.slice(0, 5);
+    const restCount = statusBreakdown.slice(5).reduce((sum, s) => sum + s.count, 0);
+    const rest = restCount > 0 ? [{ label: "אחר", value: restCount, color: "#898781" }] : [];
+    return [...top.map((s) => ({ label: s.status, value: s.count, color: s.color })), ...rest];
+  })();
+
+  const dealStageSlices = DEAL_STAGES.map((stage) => ({
+    label: stage,
+    value: deals.filter((d) => d.stage === stage).length,
+    color: DEAL_STAGE_CHART_COLORS[stage],
+  }));
+
   const existingVsNewTotal = revenueExisting + revenueNew;
+  const existingVsNewSlices = [
+    { label: "קיימים", value: revenueExisting, color: "#e34948" },
+    { label: "חדשים", value: revenueNew, color: "#2a78d6" },
+  ];
 
   const liveStatCards = [
     { label: "אנשי קשר", value: contacts.length },
@@ -231,35 +250,38 @@ export default function DashboardPage() {
             </Card>
           ))}
         </div>
-        {existingVsNewTotal > 0 && (
-          <div className="flex items-center gap-3 rounded-md border bg-background p-3">
-            <span className="shrink-0 text-xs text-muted-foreground">
-              חלוקת הכנסות {periodLabel}
-            </span>
-            <div className="flex h-2 flex-1 overflow-hidden rounded-full">
-              <div
-                style={{
-                  width: `${(revenueExisting / existingVsNewTotal) * 100}%`,
-                  backgroundColor: "#e34948",
-                }}
-              />
-              <div className="w-0.5 shrink-0 bg-background" />
-              <div
-                style={{
-                  width: `${(revenueNew / existingVsNewTotal) * 100}%`,
-                  backgroundColor: "#2a78d6",
-                }}
-              />
-            </div>
-            <span className="shrink-0 text-xs text-muted-foreground">
-              <span className="inline-block h-2 w-2 rounded-full align-middle" style={{ backgroundColor: "#e34948" }} />{" "}
-              קיימים {Math.round((revenueExisting / existingVsNewTotal) * 100)}%
-              {"  ·  "}
-              <span className="inline-block h-2 w-2 rounded-full align-middle" style={{ backgroundColor: "#2a78d6" }} />{" "}
-              חדשים {Math.round((revenueNew / existingVsNewTotal) * 100)}%
-            </span>
-          </div>
-        )}
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <Card>
+          <CardHeader>
+            <CardTitle>🥧 עסקאות לפי שלב</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <DonutChart slices={dealStageSlices} />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>🥧 הכנסות {periodLabel} — קיימים מול חדשים</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <DonutChart
+              slices={existingVsNewSlices}
+              formatValue={(v) => formatMoney(v, hidden)}
+            />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>🥧 אנשי קשר לפי סטטוס</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <DonutChart slices={statusDonutSlices} />
+          </CardContent>
+        </Card>
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
