@@ -25,6 +25,26 @@ export const followUpTemplates = [
   {
     id: "check-in",
     label: "צ'ק אין",
-    build: (name: string) => `היי ${name}, איך מתקדם? רציתי לשמוע ממך :)`,
+    build: (name: string) =>
+      `היי ${name}, מה שלומך?\nהאם במקרה צריכים הזמנה חדשה?`,
   },
-];
+  {
+    id: "unavailable-male",
+    label: "טרם היית זמין",
+    tag: "זכר",
+    build: () =>
+      `טרם היית זמין,\nאיזה סוג נייר ומה הכמות שאתה מעוניין?\nהאם רלוונטיים לך עוד מוצרים?`,
+  },
+  {
+    id: "unavailable-female",
+    label: "טרם היית זמינה",
+    tag: "נקבה",
+    build: () =>
+      `טרם היית זמינה,\nאיזה סוג נייר ומה הכמות שאת מעוניינת?\nהאם רלוונטיים לך עוד מוצרים?`,
+  },
+] as {
+  id: string;
+  label: string;
+  tag?: string;
+  build: (name: string) => string;
+}[];

@@ -76,8 +76,13 @@ export function FollowUpMenu({
           <DropdownMenuItem
             key={template.id}
             onClick={() => send(template.build(name))}
-            className="whitespace-normal rounded-lg border p-3 text-center text-sm leading-relaxed data-highlighted:bg-accent"
+            className="flex-col gap-1 whitespace-pre-line rounded-lg border p-3 text-center text-sm leading-relaxed data-highlighted:bg-accent"
           >
+            {template.tag && (
+              <span className="rounded-full bg-muted px-2 text-xs text-muted-foreground">
+                {template.tag}
+              </span>
+            )}
             {template.build(name)}
           </DropdownMenuItem>
         ))}
